@@ -1,0 +1,8 @@
+{
+  "name": "rnd",
+  "description": "General-purpose R&D investigation pipeline for any domain — software systems, tools, frameworks, techniques, product features, infrastructure, or workflows. Researches a topic and produces a structured report.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Tang Cong Han"
+  }
+}

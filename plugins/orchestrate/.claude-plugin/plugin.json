@@ -1,0 +1,8 @@
+{
+  "name": "orchestrate",
+  "description": "Plan with the expensive model, execute with cheap parallel subagents. Produces a concrete plan using the session's active model (Opus/Fable), then fans the well-specified grunt work out to parallel Sonnet subagents to save tokens.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Tang Cong Han"
+  }
+}

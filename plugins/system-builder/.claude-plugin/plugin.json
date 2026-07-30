@@ -1,0 +1,8 @@
+{
+  "name": "system-builder",
+  "description": "Phase-gated workflow for building a new system end to end: kickoff interview, multi-agent R&D, detailed planning, subagent code execution, then review and demo. Pairs with the orchestrate plugin when installed.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Tang Cong Han"
+  }
+}

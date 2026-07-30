@@ -7,6 +7,42 @@
   },
   "plugins": [
     {
+      "name": "orchestrate",
+      "description": "Plan with the expensive model, execute with cheap parallel subagents. Produces a concrete plan using the session's active model (Opus/Fable), then fans the well-specified grunt work out to parallel Sonnet subagents to save tokens.",
+      "author": {
+        "name": "Tang Cong Han"
+      },
+      "source": "./plugins/orchestrate",
+      "category": "development"
+    },
+    {
+      "name": "rnd",
+      "description": "General-purpose R&D investigation pipeline for any domain — software systems, tools, frameworks, techniques, product features, infrastructure, or workflows. Researches a topic and produces a structured report.",
+      "author": {
+        "name": "Tang Cong Han"
+      },
+      "source": "./plugins/rnd",
+      "category": "productivity"
+    },
+    {
+      "name": "system-builder",
+      "description": "Phase-gated workflow for building a new system end to end: kickoff interview, multi-agent R&D, detailed planning, subagent code execution, then review and demo. Pairs with the orchestrate plugin when installed.",
+      "author": {
+        "name": "Tang Cong Han"
+      },
+      "source": "./plugins/system-builder",
+      "category": "development"
+    },
+    {
+      "name": "trading-rnd",
+      "description": "Deep R&D investigation pipeline for US-stocks auto-trading topics — strategies, indicators, market data, broker capabilities, risk management, and backtesting — producing a structured report with a feasibility assessment.",
+      "author": {
+        "name": "Tang Cong Han"
+      },
+      "source": "./plugins/trading-rnd",
+      "category": "productivity"
+    },
+    {
       "name": "video-analysis",
       "description": "Watch, analyze, and take structured knowledge notes from videos. Handles YouTube, TikTok, Douyin, RedNote/Xiaohongshu, Bilibili, any yt-dlp-supported site, or a local file, by decomposing the video into frames plus a transcript and writing timestamped notes.",
       "author": {
