@@ -1,0 +1,28 @@
+# OS cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Scratch output from the skill's own pipeline — never commit media or transcripts.
+# Scoped to typical workdir names rather than blanket *.jpg/*.png, so plugin
+# documentation screenshots still commit normally.
+**/frames/
+**/grids/
+**/scenes/
+**/zoom/
+*.mp4
+*.mkv
+*.webm
+*.mov
+*.avi
+*.wav
+*.srt
+*.vtt
+transcript.txt
+metadata.json
+cookies*.txt
