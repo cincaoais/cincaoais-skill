@@ -32,15 +32,66 @@ rename_to_timestamps() { # $1=prefix-glob-dir $2=interval $3=offset $4=newprefix
   done
 }
 
-extract_interval() { # $1=interval-seconds $2=scale-width $3=offset $4=end("" = full)
-  local interval="$1" width="$2" offset="${3:-0}" end="${4:-}"
-  local seek=() dur=()
-  [ "$offset" != "0" ] && seek=(-ss "$offset")
-  [ -n "$end" ] && dur=(-t "$(python3 -c "print($end - $offset)")")
-  ffmpeg -v error "${seek[@]}" -i "$VIDEO" "${dur[@]}" \
-    -vf "fps=1/${interval},scale=${width}:-2" -q:v 4 \
-    "$OUTDIR/_seq_%05d.jpg"
-  rename_to_timestamps "$OUTDIR" "$interval" "$offset" ""
+extract_interval() { # $1=interval-seconds $2=scale-width $3=offset(unused) $4=end("" = full)
+  local interval="$1" width="$2" end="${4:-}"
+  local dur=() log="$OUTDIR/_interval_log.txt"
+  local i=0 f ts target k
+  # Name frames from the REAL presentation time of the frame that was selected,
+  # never from arithmetic. `-vf fps=1/N` was the previous approach and it lies:
+  # the fps filter SYNTHESISES output PTS in a 1/N timebase, so `showinfo` dutifully
+  # reports pts_time 1230 for output frame 41 even when the input frame it picked
+  # for that 30s bucket came from elsewhere in the bucket. Verified 2026-07-30 on a
+  # 21m51s 30fps screencast: the file named t1230.0.jpg held content that a no-seek
+  # `select='between(t,1229.98,1230.06)'` extraction proved belongs ~30s earlier.
+  # Names could therefore be off by up to one full bucket (30s at the long tier) —
+  # and grid_index.txt inherited the error while looking perfectly plausible.
+  # `select` on absolute t + showinfo pts (the extract_scenes pattern) cannot drift:
+  # the label is read back from the frame itself.
+  # Selection window must be at least ONE FULL frame duration. The first frame
+  # at or after a bucket boundary sits < 1/fps past it, so a window of 1/fps
+  # guarantees every bucket yields a frame; a narrower window does not. A half-
+  # frame window (0.5/fps) looks fine at exactly 30fps — 30s buckets land on a
+  # frame boundary so mod() hits 0 — but silently drops buckets at 29.97fps
+  # (30000/1001), where frame times drift against the bucket grid. Verified
+  # 2026-07-30: at 0.5/fps a 600s 29.97fps clip yielded 11 of 20 long-tier
+  # frames; at 1.02/fps it yields 20. The 2% margin absorbs float rounding at
+  # the boundary. Two frames can now qualify in one bucket, which is what the
+  # dedup below is for — it keeps the earliest, i.e. the one nearest the mark.
+  local fps win
+  fps="$(ffprobe -v error -select_streams v:0 -show_entries stream=avg_frame_rate \
+        -of default=nw=1:nk=1 "$VIDEO" 2>/dev/null || echo "")"
+  win="$(python3 -c "
+fps='''$fps'''.strip()
+try:
+    n,d = fps.split('/'); r = float(n)/float(d)
+except Exception:
+    r = float(fps) if fps else 25.0
+if r <= 0: r = 25.0
+print(f'{1.02/r:.6f}')")"
+  [ -n "$end" ] && dur=(-t "$end")
+  ffmpeg -hide_banner -v info "${dur[@]}" -i "$VIDEO" \
+    -vf "select='lt(mod(t\,${interval})\,${win})',showinfo,scale=${width}:-2" \
+    -vsync 0 -q:v 4 "$OUTDIR/_seq_%05d.jpg" 2> "$log" || true
+  mapfile -t TIMES < <(grep -o 'pts_time:[0-9.]*' "$log" | cut -d: -f2)
+  # Belt-and-braces: keep at most one frame per interval bucket even if the
+  # window still catches two (pts jitter, variable frame rate).
+  declare -A SEEN=()
+  local bucket
+  for f in "$OUTDIR"/_seq_*.jpg; do
+    [ -e "$f" ] || continue
+    ts="${TIMES[$i]:-0}"; i=$((i+1))
+    bucket="$(python3 -c "print(int(round(float('$ts')/$interval)))")"
+    if [ -n "${SEEN[$bucket]:-}" ]; then rm -f "$f"; continue; fi
+    SEEN[$bucket]=1
+    target="$(printf '%s/t%.1f.jpg' "$OUTDIR" "$ts")"
+    k=1
+    while [ -e "$target" ]; do
+      target="$(printf '%s/t%.1f_%d.jpg' "$OUTDIR" "$ts" "$k")"
+      k=$((k+1))
+    done
+    mv "$f" "$target"
+  done
+  rm -f "$log"
 }
 
 extract_scenes() { # scene-change keyframes with real timestamps from ffmpeg showinfo
@@ -131,6 +182,10 @@ case "$TIER" in
   zoom)
     START="${4:?zoom mode: extract_frames.sh <video> <outdir> zoom <start-s> <end-s>}"
     END="${5:?zoom mode: extract_frames.sh <video> <outdir> zoom <start-s> <end-s>}"
+    # Zoom timestamps are accurate as-is: verified 2026-07-30 against a no-seek
+    # `select='between(t,1229.98,1230.06)'` extraction — zoom_t1230.jpg matched
+    # it exactly. ffmpeg's input `-ss` is an accurate seek here, and at interval
+    # 1 the fps filter's bucket is one frame wide, so no drift accumulates.
     ffmpeg -v error -ss "$START" -i "$VIDEO" -t "$(python3 -c "print($END - $START)")" \
       -vf "fps=1,scale=800:-2" -q:v 3 "$OUTDIR/_seq_%05d.jpg"
     rename_to_timestamps "$OUTDIR" 1 "$START" "zoom_"

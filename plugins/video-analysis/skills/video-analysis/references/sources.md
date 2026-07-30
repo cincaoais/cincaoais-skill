@@ -30,13 +30,53 @@ Fallback ladder, in order:
 4. Cookies: `--cookies-from-browser chrome` with a browser session that has
    visited douyin.com (login not always required, but a session cookie often
    is). The fetch script tries this automatically.
-5. If still failing: ask the user to save the video via the Douyin app's
+5. **Share-page route — try this BEFORE giving up (worked 2026-07-30 when every
+   yt-dlp path failed).** Douyin's web detail JSON now needs a request signature
+   yt-dlp cannot produce, so it dies with `Fresh cookies (not necessarily logged
+   in) are needed` even with valid fresh cookies. On Windows, cookie extraction
+   also fails independently: Chrome's DB is locked while Chrome runs (yt-dlp
+   issue 7271) and Edge/Chrome v20+ app-bound encryption defeats DPAPI (issue
+   10927). The `iesdouyin.com` share page is unsigned and still serves the play
+   URL. Get the numeric id from the short link, then:
+
+   ```bash
+   ID=7646688808183827739   # from: curl -sIL https://v.douyin.com/XXXX/ | grep -i location
+   UA="Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+   curl -sL -A "$UA" "https://www.iesdouyin.com/share/video/$ID/" -o share.html
+   # play url lives in the _ROUTER_DATA JSON blob; unescape \u002F and \/
+   python3 - <<'EOF'
+   import re, json
+   h = open('share.html', encoding='utf-8', errors='replace').read()
+   m = re.search(r'_ROUTER_DATA\s*=\s*(\{.*?\})\s*</script>', h, re.S)
+   d = json.loads(m.group(1)); urls = []
+   def walk(o):
+       if isinstance(o, dict):  [walk(v) for v in o.values()]
+       elif isinstance(o, list): [walk(v) for v in o]
+       elif isinstance(o, str) and 'http' in o and ('/aweme/v1/play' in o or 'douyinvod' in o):
+           urls.append(o.replace('\\u002F','/').replace('\\/','/'))
+   walk(d); open('urls.txt','w').write('\n'.join(dict.fromkeys(urls)))
+   EOF
+   curl -sL -A "$UA" -e "https://www.iesdouyin.com/" "$(head -1 urls.txt)" -o video.mp4
+   ```
+
+   Verify with `ffprobe` before trusting it — a signature failure returns a small
+   HTML error body with `http=200`, not an mp4. `m.douyin.com/share/video/$ID`
+   is an equivalent fallback if `iesdouyin` is blocked.
+6. Last resort: ask the user to save the video via the Douyin app's
    share → 保存到相册 (works when the creator allows downloads), then provide
    the local path.
 
-Notes: Douyin videos are usually < 3 min → tier `short`. Speech is often fast
-zh with background music; if Whisper output looks garbled, retry with
-`--model medium` and language forced to zh.
+Notes: Douyin videos are usually < 3 min → tier `short`, but tutorial/course
+accounts post 20 min+ (a 21m51s example ran ~104 MB) — always `probe.sh` before
+planning extraction. Speech is often fast zh with background music; if Whisper
+output looks garbled, retry with `--model medium` and language forced to zh.
+Expect Whisper to mangle CN tool names (即梦→"极目/吉梦/寂寞", 豆包→"多宝/节目") —
+cross-check every product name against the frames before writing it into notes.
+
+Do NOT try to read the video URL out of a page via the in-app browser or the
+Chrome extension: signed CDN URLs carry cookie-like query strings, the tool layer
+blocks returning them, and the douyinvod CDN sends no CORS headers so an in-page
+`fetch` fails too. Douyin's anti-bot also hangs the in-app browser pane.
 
 ## RedNote / Xiaohongshu 小红书 (xiaohongshu.com, xhslink.com)
 

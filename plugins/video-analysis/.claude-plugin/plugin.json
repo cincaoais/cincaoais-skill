@@ -1,7 +1,7 @@
 {
   "name": "video-analysis",
   "description": "Watch, analyze, and take structured knowledge notes from videos by extracting frames and a transcript, then writing timestamped notes with a prompt-ready distillation.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": {
     "name": "Tang Cong Han"
   }

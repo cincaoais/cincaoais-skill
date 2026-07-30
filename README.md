@@ -24,7 +24,7 @@ for a private repo.
   - [`/orchestrate`](#orchestrate--plan-expensive-execute-cheap)
   - [`/system-builder`](#system-builder--build-a-whole-system-in-five-gated-phases)
 - [video-analysis setup & troubleshooting](#video-analysis-setup--troubleshooting)
-- [video-analysis changes from upstream](#video-analysis-changes-from-upstream-v110)
+- [video-analysis changes from upstream](#video-analysis-changes-from-upstream)
 - [Repo layout](#repo-layout)
 - [Attribution](#attribution)
 - [Line endings](#line-endings)
@@ -104,7 +104,7 @@ marketplace be the single source of truth.
 
 | Plugin | Command | Version | What it does |
 |---|---|---|---|
-| `video-analysis` | `/video-analysis` | 1.1.0 | Turns a video URL or local file into structured, timestamped knowledge notes |
+| `video-analysis` | `/video-analysis` | 1.1.1 | Turns a video URL or local file into structured, timestamped knowledge notes |
 | `rnd` | `/rnd` | 1.0.0 | Researches any topic → decision-ready report + Claude Code handoff prompt |
 | `trading-rnd` | `/trading-rnd` | 1.0.0 | Same, specialised for US-stocks auto-trading, with a fit check against your system |
 | `orchestrate` | `/orchestrate` | 1.0.0 | Plans with the expensive model, fans execution out to parallel Sonnet subagents |
@@ -424,7 +424,7 @@ ask before installing anything on your machine.
 |---|---|---|
 | `ffmpeg` / `ffprobe` | always | `winget install Gyan.FFmpeg` · `brew install ffmpeg` · `apt install ffmpeg` |
 | `yt-dlp` | URLs only | `winget install yt-dlp.yt-dlp` · `pipx install yt-dlp` |
-| `faster-whisper` | videos without captions | `pip install faster-whisper` — **`pip`, not `pipx`** (see [below](#video-analysis-changes-from-upstream-v110)) |
+| `faster-whisper` | videos without captions | `pip install faster-whisper` — **`pip`, not `pipx`** (see [below](#video-analysis-changes-from-upstream)) |
 
 Alternatives to `faster-whisper`: `openai-whisper`, `whisper.cpp` (`whisper-cli`), or
 `mlx-whisper` on Apple Silicon. Whichever is installed gets used.
@@ -463,10 +463,13 @@ Frames are timestamp-named (`t0042.5.jpg` = 42.5 s). Medium/long tiers also prod
 
 ---
 
-## video-analysis changes from upstream (v1.1.0)
+## video-analysis changes from upstream
 
-Three bugs, each reproduced and verified against a synthetic 300s clip with hard cuts and a real
-50-minute Douyin video.
+Four bugs, each reproduced and verified — the first three against a synthetic 300s clip with hard
+cuts and a real 50-minute Douyin video, the fourth against a luminance-ramp clip whose brightness
+encodes its own timestamp, so a frame's true time can be measured rather than eyeballed.
+
+### v1.1.0
 
 1. **Scene detection failed on Windows.** `extract_frames.sh` passed a path to
    `metadata=print:file=` *inside* the ffmpeg filtergraph, where `:` is an option separator and
@@ -489,6 +492,37 @@ Three bugs, each reproduced and verified against a synthetic 300s clip with hard
 
 Also fixed: scene keyframes rounding to 0.1s could collide on rapid cuts and silently overwrite
 each other (310 frames in, 286 out). Collisions now get a numeric suffix.
+
+### v1.1.1
+
+4. **Every interval frame carried the wrong timestamp.** `extract_interval` sampled with
+   `-vf fps=1/N`, but the `fps` filter *synthesises* output timestamps in a 1/N timebase — so
+   `showinfo` reports the bucket's nominal time regardless of where in the bucket the selected
+   frame actually came from. Measured on a 600s 30fps ramp at the long tier: **all 20 frames were
+   labelled 12–17s early**, a consistent bias of about half a 30s bucket. `grid_index.txt`
+   inherited the error, and nothing about the output looked wrong. Notes built on this cite
+   timestamps that don't match the video.
+
+   Now selects on absolute `t` and reads the label back off the emitted frame
+   (`select='lt(mod(t,N),win)',showinfo`), which cannot drift. Same clip after the fix: worst
+   error 2.9s, within the ±2.5s precision of the measurement itself.
+
+   **The window width is the subtle part.** It must be at least one *full* frame duration. A
+   half-frame window looks correct at exactly 30fps — 30s buckets land on a frame boundary, so
+   `mod()` hits zero every time — but silently drops buckets at 29.97fps (`30000/1001`), where
+   frame times drift against the bucket grid. At `0.5/fps` a 600s 29.97fps clip yielded **11 of
+   20** long-tier frames; at `1.02/fps` it yields 20. Verified at 30, 29.97, 25, 23.976, and
+   60fps: 20/20 frames each, no duplicates, worst label error 2.9s.
+
+   Zoom mode was checked and deliberately left on `fps=1` — its `-ss` seek is accurate and at
+   interval 1 the bucket is one frame wide, so no drift accumulates.
+
+Also added: a Douyin fallback route via the unsigned `iesdouyin.com` share page, for when yt-dlp
+fails with `Fresh cookies (not necessarily logged in) are needed` because the web detail JSON now
+demands a request signature yt-dlp cannot produce. On Windows, cookie extraction fails
+independently — Chrome's DB is locked while Chrome runs, and Chrome/Edge v20+ app-bound encryption
+defeats DPAPI — so the cookie ladder is not a way out. **The network route is documented but
+untested here**; only its URL-extraction snippet was verified, against a synthetic page.
 
 ---
 
