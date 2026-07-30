@@ -1,0 +1,15 @@
+# Force LF in the working tree for everything text.
+#
+# Without this, a clone on Windows (core.autocrlf=true, the default from Git for
+# Windows) rewrites the shell scripts to CRLF. bash then fails on the carriage
+# returns with errors like:
+#     $'\r': command not found
+#     syntax error near unexpected token `$'{\r''
+# which is confusing to diagnose because the file looks correct in an editor.
+* text=auto eol=lf
+
+# Be explicit for the executable scripts — these must never be CRLF.
+*.sh text eol=lf
+
+*.md  text eol=lf
+*.json text eol=lf
