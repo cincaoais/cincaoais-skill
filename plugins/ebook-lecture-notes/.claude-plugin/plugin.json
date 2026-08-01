@@ -1,0 +1,8 @@
+{
+  "name": "ebook-lecture-notes",
+  "description": "Turn ebooks (PDF, EPUB, DOCX, MOBI, and more) into layered study notes written in the voice of a senior lecturer — named mental models, data-backed charts, a critical layer that argues against the book, and a self-test. Handles single books or a whole directory in batch.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Tang Cong Han"
+  }
+}

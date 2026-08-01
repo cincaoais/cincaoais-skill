@@ -1,0 +1,168 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{BOOK_TITLE}} — Illustrated Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Ledger palette — pale cool ground, tabular figures, brass + oxide accents.
+   Built for long-form reading, not dashboard scanning.
+   Swap the palette if the book's subject suggests better; keep the structure. */
+:root{
+  --ground:#E9EDE9; --paper:#F6F8F5; --ink:#1A211D; --ink-2:#4A544E; --ink-3:#7C857F;
+  --rule:#C9D2C9; --brass:#9C7420; --brass-soft:#D9C48A;
+  --oxide:#8A382A; --oxide-soft:#D9A99F; --slate:#40566B;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"Source Serif 4",Georgia,serif;font-size:17px;line-height:1.65;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:0 24px 100px}
+h1,h2,h3,.eyebrow,.fig-label,th,.stamp-cap,.stat{font-family:"Archivo",system-ui,sans-serif}
+.num,code,.mono,td.n,.stamp-val,.meta,.caption{font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-variant-numeric:tabular-nums}
+
+header{padding:72px 0 40px;border-bottom:2px solid var(--ink)}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass);
+  font-weight:600;margin:0 0 18px}
+h1{font-size:clamp(38px,7vw,64px);line-height:1.02;font-weight:700;letter-spacing:-.02em;margin:0 0 4px}
+.h1-sub{font-size:clamp(24px,4vw,36px);font-weight:500;color:var(--ink-2);margin:0 0 26px}
+.meta{font-size:13px;color:var(--ink-3);line-height:1.9}
+.logline{margin:32px 0 0;padding:20px 24px;background:var(--paper);
+  border-left:3px solid var(--brass);font-size:19px;line-height:1.5}
+.logline em{font-style:italic;color:var(--brass)}
+.sourcing{margin:40px 0 0;padding:18px 22px;border:1px dashed var(--rule);
+  font-size:14px;line-height:1.6;color:var(--ink-2)}
+.tag{display:inline-block;font-family:"Archivo",sans-serif;font-size:10px;font-weight:600;
+  letter-spacing:.09em;text-transform:uppercase;padding:2px 7px;border-radius:2px;vertical-align:2px}
+.tag-book{background:var(--brass-soft);color:#4A3708}
+.tag-mine{background:#CFDBE4;color:#233642}
+.tag-check{background:var(--oxide-soft);color:#5A1D13}
+
+section{padding:64px 0 0;border-top:1px solid var(--rule);margin-top:64px}
+section:first-of-type{border-top:none}
+.fig-label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
+  font-weight:600;margin:0 0 10px}
+h2{font-size:31px;line-height:1.15;font-weight:600;letter-spacing:-.015em;margin:0 0 6px}
+.sub{color:var(--ink-2);font-size:16px;margin:0 0 28px;font-style:italic}
+.chart-box{background:var(--paper);border:1px solid var(--rule);padding:22px 20px 16px;margin:0 0 8px}
+.chart-box.tall{height:420px}
+.chart-box.mid{height:340px}
+.caption{font-size:12.5px;color:var(--ink-3);margin:0 0 26px;line-height:1.6}
+p{margin:0 0 18px}
+h3{font-size:16px;font-weight:600;margin:30px 0 8px}
+.catch{margin:24px 0 0;padding:16px 20px;border-left:2px solid var(--oxide);
+  font-size:15.5px;line-height:1.6;color:var(--ink-2)}
+.catch b{font-family:"Archivo",sans-serif;font-weight:600;color:var(--oxide);display:block;
+  font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+.num{color:var(--ink);font-weight:700}
+
+/* Signature-number treatment: use when a book turns on one figure.
+   Two numbers at 46px land harder than any bar chart. */
+.stamp{display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap;
+  padding:44px 24px;margin:0 0 8px;background:var(--paper);border:1px solid var(--rule)}
+.stamp-side{text-align:center;min-width:180px}
+.stamp-cap{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
+  font-weight:600;margin-bottom:8px}
+.stamp-val{font-size:clamp(30px,6vw,46px);font-weight:700;line-height:1}
+.stamp-val.old{color:var(--oxide)} .stamp-val.new{color:var(--brass)}
+.stamp-note{font-size:12.5px;color:var(--ink-3);margin-top:8px;font-family:"JetBrains Mono",monospace}
+.stamp-arrow{font-size:24px;color:var(--ink-3)}
+
+table{width:100%;border-collapse:collapse;margin:0 0 8px;background:var(--paper);
+  border:1px solid var(--rule);font-size:14.5px}
+th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;text-align:left;
+  padding:12px 16px;border-bottom:1px solid var(--rule);color:var(--ink-3)}
+td{padding:11px 16px;border-bottom:1px solid var(--rule)}
+tr:last-child td{border-bottom:none}
+td.n{text-align:right}
+.hot{color:var(--oxide);font-weight:700}
+
+.close{margin-top:72px;padding:34px 30px;background:var(--ink);color:#DCE4DD}
+.close h2{color:#F6F8F5;font-size:24px;margin-bottom:16px}
+.close p,.close li{color:#B9C4BB;font-size:15.5px}
+.close b{color:var(--brass-soft)}
+.close ol{padding-left:20px}
+.close li{margin-bottom:9px}
+@media(max-width:600px){
+  body{font-size:16px} .wrap{padding:0 18px 70px}
+  .chart-box.tall{height:330px} .chart-box.mid{height:290px}
+  .stamp{gap:14px} .stamp-arrow{transform:rotate(90deg)}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">Illustrated notes · evidence layer</p>
+  <h1>{{BOOK_TITLE}}</h1>
+  <p class="h1-sub">{{ORIGINAL_TITLE}}</p>
+  <p class="meta">{{AUTHOR}} · {{PUBLISHER}} {{YEAR}}<br>{{PAGES}} pp · {{CHAPTERS}} chapters</p>
+  <p class="logline">{{LOGLINE_INTRO}}<br><em>{{LOGLINE}}</em></p>
+  <div class="sourcing">
+    <strong>How to read the tags.</strong>
+    <span class="tag tag-book">Book</span> figures from the text.
+    <span class="tag tag-mine">Added</span> framing or comparison supplied here.
+    <span class="tag tag-check">Verify</span> load-bearing claims to confirm independently.
+  </div>
+</header>
+
+<!-- SECTION PATTERN — repeat per chart.
+     Order matters: puzzle or claim FIRST, then chart, then reading, then catch.
+     Never a gallery of charts followed by a wall of text. -->
+<section>
+  <p class="fig-label">Figure N · {{ROLE}}</p>
+  <h2>{{HEADLINE_AS_CLAIM_OR_QUESTION}}</h2>
+  <p class="sub">{{ONE_LINE_CONTEXT}}</p>
+
+  <p>{{SET_UP_THE_PUZZLE_BEFORE_THE_CHART}}</p>
+
+  <div class="chart-box mid"><canvas id="cN"></canvas></div>
+  <p class="caption">{{AXIS_NOTE}} <span class="tag tag-book">Book</span></p>
+
+  <p>{{HOW_TO_READ_IT}}</p>
+
+  <div class="catch">
+    <b>{{CATCH_HEADING}}</b>
+    {{WHAT_THIS_CHART_OMITS_OR_OVERSTATES}}
+  </div>
+</section>
+
+<div class="close">
+  <h2>Reading this critically</h2>
+  <p><b>{{AUTHOR_INTEREST}}</b></p>
+  <p>{{AGE_OF_BOOK_AND_WHAT_TO_CHECK}}</p>
+  <ol><li>{{TESTABLE_CLAIM}}</li></ol>
+  <p><b>What survives regardless:</b> {{DURABLE_VALUE}}</p>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const INK='#1A211D', INK2='#4A544E', INK3='#7C857F', RULE='#C9D2C9',
+      BRASS='#9C7420', BRASSL='#D9C48A', OXIDE='#8A382A', OXIDEL='#D9A99F', SLATE='#40566B';
+Chart.defaults.font.family="'JetBrains Mono', ui-monospace, monospace";
+Chart.defaults.font.size=11;
+Chart.defaults.color=INK3;
+Chart.defaults.plugins.legend.labels.boxWidth=10;
+Chart.defaults.plugins.legend.labels.font={family:"'Archivo', sans-serif",size:11};
+const grid={color:RULE,drawTicks:false};
+const noGrid={display:false};
+
+/* Forecasts must be visually distinct from observations — dashed border,
+   reduced opacity. A prediction rendered identically to a measurement is a
+   lie of formatting.
+
+   new Chart(document.getElementById('cN'),{
+     type:'bar',
+     data:{labels:[...],datasets:[{data:[...],
+       backgroundColor:[BRASSL,BRASS,OXIDE,'rgba(138,56,42,.28)'],
+       borderColor:[BRASSL,BRASS,OXIDE,OXIDE], borderWidth:[0,0,0,2],
+       borderDash:[6,4]}]},
+     options:{maintainAspectRatio:false,
+       plugins:{legend:{display:false}},
+       scales:{y:{grid},x:{grid:noGrid}}}});
+
+   Log scale for anything spanning orders of magnitude — and LABEL it as log
+   on the axis title. An unlabelled log scale flattens exponential growth
+   into something reassuring, inverting the point you were making. */
+</script>

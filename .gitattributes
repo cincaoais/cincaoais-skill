@@ -10,6 +10,7 @@
 
 # Be explicit for the executable scripts — these must never be CRLF.
 *.sh text eol=lf
+*.py text eol=lf
 
 *.md  text eol=lf
 *.json text eol=lf

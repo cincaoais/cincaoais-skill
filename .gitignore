@@ -8,6 +8,10 @@ desktop.ini
 .idea/
 *.swp
 
+# Python bytecode (ebook-lecture-notes scripts)
+__pycache__/
+*.pyc
+
 # Scratch output from the skill's own pipeline — never commit media or transcripts.
 # Scoped to typical workdir names rather than blanket *.jpg/*.png, so plugin
 # documentation screenshots still commit normally.

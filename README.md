@@ -15,16 +15,18 @@ for a private repo.
 ## Contents
 
 - [Install](#install)
-- [The five plugins at a glance](#the-five-plugins-at-a-glance)
+- [The six plugins at a glance](#the-six-plugins-at-a-glance)
 - [Which one do I use?](#which-one-do-i-use)
 - [User guide](#user-guide)
   - [`/video-analysis`](#video-analysis--turn-a-video-into-notes)
+  - [`/ebook-lecture-notes`](#ebook-lecture-notes--turn-a-book-into-notes-youll-actually-read)
   - [`/rnd`](#rnd--research-anything-before-building-it)
   - [`/trading-rnd`](#trading-rnd--research-for-the-us-stocks-auto-trading-system)
   - [`/orchestrate`](#orchestrate--plan-expensive-execute-cheap)
   - [`/system-builder`](#system-builder--build-a-whole-system-in-five-gated-phases)
 - [video-analysis setup & troubleshooting](#video-analysis-setup--troubleshooting)
 - [video-analysis changes from upstream](#video-analysis-changes-from-upstream)
+- [ebook-lecture-notes changes from upstream](#ebook-lecture-notes-changes-from-upstream)
 - [Repo layout](#repo-layout)
 - [Attribution](#attribution)
 - [Line endings](#line-endings)
@@ -58,6 +60,7 @@ ssh -T git@github.com
 
 ```
 /plugin install video-analysis@claude-skills
+/plugin install ebook-lecture-notes@claude-skills
 /plugin install rnd@claude-skills
 /plugin install trading-rnd@claude-skills
 /plugin install orchestrate@claude-skills
@@ -94,25 +97,27 @@ active after you install the plugin versions, and you end up with two of each. C
 ls ~/.claude/skills
 ```
 
-If you see `orchestrate`, `rnd`, `trading-rnd`, `system-builder`, or `video-analysis` in there
-**and** you've installed them from this marketplace, delete the loose directories and let the
-marketplace be the single source of truth.
+If you see `orchestrate`, `rnd`, `trading-rnd`, `system-builder`, `video-analysis`, or
+`ebook-lecture-notes` in there **and** you've installed them from this marketplace, delete the
+loose directories and let the marketplace be the single source of truth.
 
 ---
 
-## The five plugins at a glance
+## The six plugins at a glance
 
 | Plugin | Command | Version | What it does |
 |---|---|---|---|
 | `video-analysis` | `/video-analysis` | 1.1.1 | Turns a video URL or local file into structured, timestamped knowledge notes |
+| `ebook-lecture-notes` | `/ebook-lecture-notes` | 1.0.0 | Turns an ebook or a folder of ebooks into layered lecturer-voice study notes, with charts and a self-test |
 | `rnd` | `/rnd` | 1.0.0 | Researches any topic → decision-ready report + Claude Code handoff prompt |
 | `trading-rnd` | `/trading-rnd` | 1.0.0 | Same, specialised for US-stocks auto-trading, with a fit check against your system |
 | `orchestrate` | `/orchestrate` | 1.0.0 | Plans with the expensive model, fans execution out to parallel Sonnet subagents |
 | `system-builder` | `/system-builder` | 1.0.0 | Phase-gated build workflow: interview → R&D → plan → execute → review |
 
-All five are **skills**, so you don't strictly need the slash command. Describing the task in plain
-language triggers them too — pasting a YouTube link fires `video-analysis`, saying "let's build a
-habit tracker app" fires `system-builder`. The slash command is just the explicit way to ask.
+All six are **skills**, so you don't strictly need the slash command. Describing the task in plain
+language triggers them too — pasting a YouTube link fires `video-analysis`, saying "summarize this
+book, I don't have time to read it" fires `ebook-lecture-notes`, saying "let's build a habit
+tracker app" fires `system-builder`. The slash command is just the explicit way to ask.
 
 ---
 
@@ -121,6 +126,7 @@ habit tracker app" fires `system-builder`. The slash command is just the explici
 | You want to… | Use |
 |---|---|
 | Understand what's in a video without watching it | `/video-analysis` |
+| Digest a book or a folder of ebooks without reading them | `/ebook-lecture-notes` |
 | Learn a new area / compare options / decide whether to adopt something | `/rnd` |
 | Research a trading strategy, indicator, broker, or data source | `/trading-rnd` |
 | Improve something that already exists (a service, a pipeline, a strategy) | `/rnd` or `/trading-rnd` — both have an "improve" mode |
@@ -196,6 +202,72 @@ straight into a system prompt.
 
 **Requirements.** Needs `ffmpeg` and `yt-dlp` installed — see
 [setup & troubleshooting](#video-analysis-setup--troubleshooting) below.
+
+---
+
+### `/ebook-lecture-notes` — turn a book into notes you'll actually read
+
+**What it does.** Compresses a 300-page book into a short layer you'll actually read, sitting on
+deeper layers you only open when you need more. The bet: *"don't keep everything in
+the notes, keep everything reachable from the notes."* At that compression ratio, losses are
+unavoidable; the skill's job is to make them recoverable, not to pretend they didn't happen. It's
+written in the voice of a senior lecturer, not a summarizer — aiming for the sentence that lodges,
+not the one that reads as furniture.
+
+**How to invoke**
+
+```
+/ebook-lecture-notes C:\Users\me\Books\some-book.pdf
+/ebook-lecture-notes C:\Users\me\Books\
+```
+
+Point it at a folder and you get one notes set per book. Plain language works too — *"summarize
+this book, I don't have time to read it"* or *"make notes from these ebooks"* both fire it.
+
+**Supported formats**
+
+`.pdf .epub .docx .txt .md .markdown .rst .html .htm .rtf .mobi .azw .azw3` — MOBI/AZW/AZW3 need
+Calibre installed for the conversion step.
+
+**What happens**
+
+1. **Extract** — `scripts/extract.py` probes which extractors are installed and picks the best one
+   per format, flagging suspicious extractions (garbled text, a PDF with no text layer) rather than
+   silently passing garbage downstream.
+2. **Find the structure** — `scripts/outline.py` runs several chapter-detection strategies,
+   including reconstruction of vertically-set CJK titles, and reports a confidence audit so you
+   know when to fall back to reading the table of contents page directly.
+3. **Classify the book.** This sets the compression ratio, and getting it wrong is the biggest
+   failure mode:
+
+   | Type | Compresses to |
+   |---|---|
+   | Single-thesis | 5–10% |
+   | Cumulative | 20–30% |
+   | Reference | 30–40% |
+   | Narrative | not compressed |
+
+4. **Read strategically**, and report honestly what fraction it actually read — a reader who
+   assumes the whole book was read will over-trust chapter ratings that are really extrapolations.
+5. **Write `NOTES.md`** in six layers: a one-page map, named mental models, an evidence layer of
+   tables and numbers, a chapter index with ★ ratings for the chapters that carry the book, a
+   critical layer that argues against the book (who wrote this, and what do they gain if you
+   believe it), and what was cut and where to find it. Closes with a 5–7 question self-test.
+6. **Build `charts.html`** — every chart carries a "catch" box stating its weakness, because a
+   chart makes a claim more persuasive than the evidence underneath it actually warrants.
+
+**What you get.** Per book: a folder with `NOTES.md`, `charts.html`, and `_source/full_text.txt`.
+Point it at a folder of books and you also get `_batch-log.md` — cross-book themes and where the
+books contradict each other.
+
+**Requirements.** Python 3. Per-format extras are printed by `python3 scripts/extract.py --check`
+— typically `pypdf`/poppler for PDF, `ebooklib` + `beautifulsoup4` for EPUB, `python-docx` for
+DOCX, `striprtf` for RTF, and Calibre for MOBI/AZW.
+
+**Worth knowing.** `charts.html` loads Chart.js and its fonts from CDNs, so it needs internet the
+first time it's opened. Scanned PDFs have no text layer — pages get rasterized and read visually
+instead of extracted. Notes on copyrighted books are personal study material, not something to
+republish.
 
 ---
 
@@ -526,6 +598,49 @@ untested here**; only its URL-extraction snippet was verified, against a synthet
 
 ---
 
+## ebook-lecture-notes changes from upstream
+
+The skill arrived as a third-party `.skill` archive with no recorded author or license. These
+defects were found in review — static analysis plus live runs on synthetic books — before import.
+
+1. **English/European chapter detection found nothing.** The normalizer stripped all whitespace
+   from a line, but the `Chapter N` / `Part N` / `Capítulo N` patterns required whitespace, so
+   `Chapter 5` arrived as `Chapter5` and could never match. Verified live: 0 of 10 headings found
+   on a synthetic book, and page-break clustering — the documented "noisy last resort" — silently
+   became the default strategy. Patterns now tolerate the stripped form.
+
+2. **On Windows, `outline.py` crashed with `UnicodeEncodeError` the moment it printed a CJK
+   chapter title.** Legacy console code pages; it happened even with output redirected to a file.
+   Verified: 0-byte JSON output, exit 1. Both scripts now force UTF-8 stdout/stderr.
+
+3. **Re-running a batch re-ingested the tool's own `notes/` output**, and every re-ingested
+   `full_text.txt` collided on one slug, silently overwriting each other. Verified: 3 of 4 books'
+   text lost. The output directory is now excluded from collection, and same-run slug collisions
+   get a numeric suffix.
+
+4. **EPUB chapter markers (`@@CHAPTER@@`) were inserted on their own line**, so the outline
+   script's pattern never saw the title. The marker now carries the heading text.
+
+5. **`Chapter 5: The Meeting` was rejected as prose** because colons were treated as prose
+   punctuation. Colons no longer disqualify a heading.
+
+6. **A chapter heading within 3 lines of a `PART` heading was deduplicated away**, and so was any
+   heading exactly 3 lines after the previous one (short chapters, dense DOCX exports). Dedupe is
+   now per-level and only collapses cross-strategy duplicates of one physical heading — same-kind
+   headings close together are kept, and the confidence audit already flags suspicious density.
+
+7. **MOBI conversion wrote to a hardcoded `/tmp`**, which fails on Windows. It now uses the
+   platform temp directory and cleans up after itself.
+
+8. **Smaller:** `pdftotext`/`pdfinfo` pipes now decode as UTF-8 (Windows' ANSI code page mangled
+   CJK); HTML is parsed from bytes so the declared charset (GBK/Big5) is honored; EPUB3 nav/TOC
+   pages are no longer swept in as fake chapter sources; localized Word heading styles
+   (Überschrift, Titre) are recognized; CJK chapter numbers ≥ 100 (一百二十三) parse; bare
+   three-character vertical headings (第五章) are detected; and the docs were synced with actual
+   script behavior.
+
+---
+
 ## Repo layout
 
 ```
@@ -535,7 +650,8 @@ plugins/<name>/
   skills/<name>/
     SKILL.md                        # the skill itself (frontmatter: name + description)
     references/                     # templates and context files, read on demand
-    scripts/                        # executable helpers (video-analysis only)
+    scripts/                        # executable helpers (video-analysis, ebook-lecture-notes)
+    assets/                         # chart template (ebook-lecture-notes only)
 ```
 
 **Adding a plugin:** create `plugins/<name>/` with the two files above, add an entry to
@@ -551,9 +667,11 @@ Keep `plugin.json` and `marketplace.json` descriptions in sync, and bump `versio
 
 ## Attribution
 
-`video-analysis` and `system-builder` originated as third-party `.skill` archives; neither
-recorded an author or a license. The `video-analysis` fixes above are the only modifications to
-that skill; `system-builder` is unmodified. `orchestrate`, `rnd`, and `trading-rnd` are personal.
+`video-analysis`, `system-builder`, and `ebook-lecture-notes` originated as third-party `.skill`
+archives; none recorded an author or a license. The `video-analysis` fixes above are the only
+modifications to that skill; `ebook-lecture-notes` was likewise patched at import — see
+[ebook-lecture-notes changes from upstream](#ebook-lecture-notes-changes-from-upstream);
+`system-builder` is unmodified. `orchestrate`, `rnd`, and `trading-rnd` are personal.
 
 No license is asserted, because the upstream skills shipped without one. Confirm the original
 terms before making this repository public or redistributing it.
