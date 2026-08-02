@@ -156,6 +156,16 @@ List categories, not items. Then give search terms for the source, in the source
 
 Frame it as diagnostic, not homework: whatever you can't answer is where the notes cut too deep — patch that section specifically rather than expanding everything.
 
+### The narrative case
+
+When SKILL.md's Step 3 classifies a book as **Narrative**, "offer a map, not a summary" means concretely:
+
+- **Layer 1 becomes the arc, not the argument** — the story's beats in order, each beat one line, so a reader knows where they are and what's at stake without the scenes being spoiled or flattened.
+- **Layer 2 survives intact, and is usually the crown layer.** Narrative authors often name and generalize their own models (a memoirist's trading rules, a biography's recurring pattern); extracting those isn't compressing the story, it's harvesting what the author already made portable.
+- **Refuse compression at the scene level.** Dialogue, dramatized numbers, the texture that makes the book worth reading — point to it (Layer 6 search terms), don't paraphrase it. A flattened scene is the one loss this skill can't make recoverable.
+- **Read sequentially.** Step 4's strategic reading order assumes a book that summarizes itself; a narrative doesn't. If the book is too long to read fully, say which stretch you read and resist rating chapters you didn't.
+- **Charts: usually one or none.** A life or a plot rarely produces data that clears the chart bar. When one number arc genuinely is the story, one chart earns its place — say why the others weren't built.
+
 ---
 
 ## 4. Sentence-level patterns

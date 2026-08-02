@@ -108,7 +108,7 @@ loose directories and let the marketplace be the single source of truth.
 | Plugin | Command | Version | What it does |
 |---|---|---|---|
 | `video-analysis` | `/video-analysis` | 1.1.1 | Turns a video URL or local file into structured, timestamped knowledge notes |
-| `ebook-lecture-notes` | `/ebook-lecture-notes` | 1.0.0 | Turns an ebook or a folder of ebooks into layered lecturer-voice study notes, with charts and a self-test |
+| `ebook-lecture-notes` | `/ebook-lecture-notes` | 1.1.0 | Turns an ebook or a folder of ebooks into layered lecturer-voice study notes, with charts and a self-test |
 | `rnd` | `/rnd` | 1.0.0 | Researches any topic → decision-ready report + Claude Code handoff prompt |
 | `trading-rnd` | `/trading-rnd` | 1.0.0 | Same, specialised for US-stocks auto-trading, with a fit check against your system |
 | `orchestrate` | `/orchestrate` | 1.0.0 | Plans with the expensive model, fans execution out to parallel Sonnet subagents |
@@ -638,6 +638,37 @@ defects were found in review — static analysis plus live runs on synthetic boo
    (Überschrift, Titre) are recognized; CJK chapter numbers ≥ 100 (一百二十三) parse; bare
    three-character vertical headings (第五章) are detected; and the docs were synced with actual
    script behavior.
+
+### v1.1.0 — refinements from a field test on real books
+
+The skill was then run end to end on real PDFs (a Chinese single-thesis polemic, a Chinese
+narrative memoir, a short English strategy document, plus a scanned book that correctly refused
+extraction). The pipeline and the note quality held up; every fix below closes a gap where the
+*instructions* left the executor guessing:
+
+1. **Output-language rule.** The skill never said which language to write notes in, so Chinese
+   books silently produced English notes. Now: the book's primary language unless the user asks
+   otherwise; translated editions may use either, stating the choice at the top of NOTES.md.
+2. **Compression ratio vs. the six layers.** A strict 5–10% is arithmetically incompatible with
+   the mandated layers on a short book. Clarified: the ratio governs the read-through layers (map
+   + mental models); evidence, index, and critique are lookup material outside it. Reading time
+   collapses, not necessarily file size.
+3. **The Narrative case is now specified**, not just named — a new PEDAGOGY.md section defines
+   "map, not summary" concretely (arc-shaped Layer 1, models still harvested, no scene-level
+   paraphrase, sequential reading, usually 0–1 charts).
+4. **Two undocumented extraction failure modes**, both hit in the field test: evidence that exists
+   only as an image (the tell is dangling prose — "the table below shows…" with nothing following;
+   render the page rather than silently under-reporting), and ToCs that survive as plain text in
+   the front matter (read them there before rasterizing; supports bare-numeral headings via a
+   content-matched, explicitly-inferred index).
+5. **New [Since] provenance tag** for post-publication facts checked against cited external
+   sources — the critical layer's age test kept producing facts that fit neither [Book], [Added],
+   nor [Verify]. Template gets the matching `tag-since` class; [Verify] now strictly means
+   "not yet confirmed."
+6. **Chart count subordinated to the chart bar** in both CHARTS.md and SKILL.md ("aim for 4–8"
+   padded thin books with decoration), plus reading-budget buckets clarified as ceilings on
+   obligation, not permission to under-read short books. Template now opens with `<!doctype html>`
+   so pages render in standards mode.
 
 ---
 

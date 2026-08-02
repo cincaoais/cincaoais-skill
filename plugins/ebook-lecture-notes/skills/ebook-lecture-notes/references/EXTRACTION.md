@@ -62,6 +62,8 @@ These matter more than the happy path, because each one produces output that *lo
 
 **EPUB extracted via stdlib zipfile** loses chapter boundaries entirely — you get one continuous blob. If chapter detection fails on an EPUB, check whether `ebooklib` was actually available before concluding the book has no chapters.
 
+**Evidence that isn't text at all.** Tables, charts, and worked examples are often embedded as images, and plain-text extraction drops them without a trace. The tell is dangling prose: *"the table below shows…"* followed by nothing, or figure captions (`图24.3`, `Figure 7`) with no figure content. This is the inverse of every other failure here — nothing is corrupted, the evidence just isn't in the text layer. When the missing content is load-bearing, render that page and read it visually (`pdftoppm -jpeg -r 150 -f <page> -l <page>`, or PyMuPDF if poppler is absent) rather than silently under-reporting the book's evidence. If it isn't worth recovering, say in Layer 6 that it exists and wasn't read.
+
 **Rule: sample the output every time.** A confident pipeline over garbage input produces confident garbage output, and nothing downstream will catch it.
 
 ---
@@ -78,7 +80,9 @@ Note that the reconstruction is often *scrambled* — the characters are all pre
 
 **Strategy C — page-break clustering.** Form feeds (`\f`) followed by short lines and a large blank gap. Noisy; use as a last resort.
 
-**Strategy D — read the ToC page directly.** Rasterize the table of contents page and read it visually. Slower but always works, and worth it for a book you're going to rely on.
+**Strategy D — read the ToC directly.** Check the front matter of `full_text.txt` first: the table of contents often survives extraction as plain text (sometimes as one run-on paragraph), and reading it there is free. Only rasterize the ToC page when the text version didn't survive. Slower but always works, and worth it for a book you're going to rely on.
+
+**A case no strategy detects:** books whose in-body chapter headings are bare numerals — a line containing only 一, 二, 三 or `1`, `2`, `3`. These are indistinguishable from ordinary text and structurally unrecoverable by pattern matching. If the ToC survived (Strategy D), build a content-matched index instead: locate each chapter by searching for its ToC title in the body, and label the result *inferred, not boundary-verified*.
 
 **When everything fails:** say so in the notes. Structure the notes by argument rather than by chapter, and note that chapter references are approximate. Do not fabricate a chapter list — a reader who goes looking for "chapter 7" on your say-so and finds something unrelated will stop trusting everything else in the document.
 
@@ -94,5 +98,7 @@ After extraction, estimate: `characters ÷ 3.5` ≈ tokens for CJK, `÷ 4` for L
 | 30–80K | Read the summary layer fully, sample evidence chapters |
 | 80–200K | Strategic read per SKILL.md Step 4. Track coverage. |
 | > 200K | Strategic read, and tell the user what fraction you covered |
+
+The buckets license sampling; they never forbid reading more. At the low end of a bucket the savings are trivial — a 45K-token book is close enough to "read it all" that deliberately under-reading to honor the category is false economy. Sampling must buy something real.
 
 **Always report coverage.** "Read approximately 13% — introduction, all part-transition passages, the payoff chapter, and samples from six evidence chapters" is honest and lets the reader calibrate. Silence implies you read everything, and that implication will be believed.

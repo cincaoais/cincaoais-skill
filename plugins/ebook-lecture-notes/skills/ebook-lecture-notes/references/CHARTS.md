@@ -15,7 +15,7 @@ Prose fails in exactly four situations:
 
 **Cut it if:** the numbers are already legible in a sentence (three values → write the sentence), the chart restates its own caption, or you're making it because the section felt text-heavy. That last one is the most common and the least defensible.
 
-Aim for 4–8 charts in a book's notes. More than that and each one stops being an event.
+Aim for 4–8 charts in a typical argumentative book's notes. More than that and each one stops being an event. **The bar overrides the count in both directions:** a narrative book or a thin document may support one chart, or none — when that happens, build fewer and say why in the notes, visibly, so the reader isn't left wondering. Padding to hit the range is exactly the decoration this file exists to prevent.
 
 ## Every chart gets a catch box
 
@@ -37,11 +37,12 @@ Every chart caption carries one or more:
 
 - **[Book]** — figures from the text
 - **[Added]** — your framing, indexing, or comparison
-- **[Verify]** — load-bearing and should be independently confirmed
+- **[Since]** — a post-publication fact you checked against an external source, cited inline. The critical layer's age test produces these; they are neither the book's claim nor your framing
+- **[Verify]** — load-bearing and *not yet* independently confirmed. Once you've confirmed it externally, it becomes **[Since]** with its source
 
 If you indexed two series to a common baseline to show a relationship the author asserted but never plotted, that's **[Book]** data with **[Added]** presentation. Say both.
 
-In `template.html` these map to the CSS classes `tag-book`, `tag-mine`, and `tag-check` respectively — the class names don't match the tag vocabulary, so don't assume you can rename one without updating the other.
+In `template.html` these map to the CSS classes `tag-book`, `tag-mine`, `tag-since`, and `tag-check` respectively — the class names don't all match the tag vocabulary, so don't assume you can rename one without updating the other.
 
 ## Building it
 
