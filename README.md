@@ -487,6 +487,100 @@ that's the fallback, not the intent.
 
 ---
 
+### `/web-pentest` — run an authorized, phase-gated web pentest
+
+**What it does.** Orchestrates a disciplined penetration test against an **authorized**
+bug-bounty or VDP target: scope/rules-of-engagement verification, recon, surface mapping,
+per-vulnerability-class testing driven through Burp Suite, PoC confirmation, and chaining —
+producing a structured findings folder. It's a **methodology orchestrator, not an exploit
+library** — it decides what to test and drives the tooling, but ships no ready-to-fire
+payloads; the class checklists teach what to look for and how to confirm it, not canned
+strings to paste.
+
+**How to invoke**
+
+```
+Please help me perform the web pentest to [platform] [program] [url]
+```
+
+For example:
+
+```
+Please help me perform the web pentest to HackerOne Acme Corp https://app.acme.example.com
+```
+
+`[platform]` is HackerOne, Bugcrowd, Intigriti, YesWeHack, or self-hosted/`security.txt`. If
+any of the three fields is missing or ambiguous, Phase 0 asks before doing anything else
+rather than guessing — including never guessing the platform from the URL's TLD or branding.
+
+**Authorized testing only.** Phase 0 is a hard stop, not a formality: it pulls the *live*
+program page, confirms the given URL is actually covered by an in-scope asset — not just
+"the program in general" — and confirms the user is an enrolled participant who has accepted
+the current RoE. **If scope cannot be confirmed with high confidence, it stops and tells the
+user instead of proceeding on a best guess.** Ambiguous wildcard matches, lookalike domains,
+unclear redirects, a program page it can't read, or an unstated registration status are all
+hard-stop conditions — not judgment calls it resolves by picking the more permissive reading.
+
+**What happens**
+
+1. **Phase 0 — Authorization & scope gate (hard stop).** Parses the trigger, fetches the live
+   program page, confirms coverage, and writes `scope.md` — the single source of truth every
+   later phase and every guardrail check reads from. Chooses the autonomy mode here too.
+2. **Phase 1 — Recon & enumeration.** Passive first (crt.sh, Wayback/gau, subfinder passive
+   sources — no target contact), then active/light (httpx, katana, nuclei) once the RoE
+   confirms automated scanning is permitted.
+3. **Phase 2 — Surface mapping.** Connects Burp and browses the app to map auth flows, roles,
+   data objects, and endpoints into `surface-map.md`. Sets up multi-account access here, since
+   access-control and business-logic testing need at least two accounts.
+4. **Phase 3 — Per-class testing.** Works eight vulnerability classes — access control,
+   auth/session, input handling, SSRF, business logic, misconfig/disclosure, API issues,
+   client-side — ordered by likely payoff from the surface map, not a fixed order.
+5. **Phase 4 — Confirmation & PoC.** Reproduces each promising finding, captures the exact
+   request/response and repro steps, scores it (CVSS v3.1), and writes it into `findings.md`.
+   Unreproducible findings are dropped or marked `candidate`.
+6. **Phase 5 — Chaining.** Combines lower-severity primitives into higher-impact chains (e.g.
+   open redirect + token leak → account takeover), documented as their own `findings.md`
+   entries with the component primitive IDs linked.
+
+**What you get.** `engagements/<program>-<date>/` — `scope.md`, `recon/`, `surface-map.md`,
+`findings.md`, and `poc/` (screenshots and saved request/response evidence). Resuming in a
+directory that already has an `engagements/` folder picks up from whichever phase is done,
+after confirming with you — it never silently restarts Phase 0 unless scope data is missing
+or looks stale.
+
+**Autonomy modes.** Chosen once at Phase 0, recorded in `scope.md`, and re-checked before
+every intrusive action for the rest of the engagement:
+
+| Mode | Behavior |
+|---|---|
+| **Gated** (default) | Passive recon runs freely. Every intrusive action — fuzzing, auth attacks, SSRF probes, injection payloads, any state-changing request — is proposed and waits for your explicit approval, one action (or one tight batch) at a time. |
+| **Semi-auto** | Recon and non-destructive active tests run automatically within RoE rate limits. Writes, deletes, or anything touching another account's data still stops and waits for confirmation. |
+| **Full-auto** | Intrusive tests fire automatically within RoE rate limits; execution stops only for destructive actions or cross-account data. Requires pre-approving in-scope hosts in Burp ("Always Allow") beforehand, or the agent loop stalls on Burp's own per-host prompts. |
+
+Some actions are **always forbidden regardless of mode**: DoS/stress testing, touching other
+real users' data, social engineering, bulk data exfiltration, destructive writes on
+production, out-of-scope assets, and exceeding stated rate limits. No RoE wording and no
+in-the-moment approval overrides these.
+
+**Tooling.** Drives **Burp Suite Community** through the official PortSwigger MCP server over
+SSE (`claude mcp add --transport sse burp http://127.0.0.1:9876/sse`) — reading proxy
+history, replaying/modifying requests via Repeater, and handing requests to Intruder for
+fuzzing. 24 of the extension's 27 MCP tools are free on Community; the 3 Pro-gated ones
+(active scanner, Collaborator) are substituted by the agent reasoning over individual
+Repeater round-trips instead. Recon runs on **native Windows PowerShell — no WSL** — using
+Windows-native binaries for `subfinder`/`httpx`/`katana`/`nuclei`/`ffuf`/`gau`/`amass`/
+`gowitness`; a zero-dependency `passive-recon.ps1` fallback covers crt.sh/Wayback/DNS when
+those aren't installed, and `setup-check.ps1` reports tool readiness plus whether the Burp
+MCP listener is reachable. If Burp MCP isn't connected, the skill degrades to **advisory
+mode** — it tells you exactly what to send or click and interprets what you paste back,
+rather than silently waiting or retrying as if nothing changed.
+
+**Boundaries.** Ships no exploit payloads or canned attack strings — the checklists teach
+methodology, not ready-to-fire code. Not for targets without a named, verified program, and
+never proceeds against a target just because it looks vulnerable.
+
+---
+
 ## video-analysis setup & troubleshooting
 
 The scripts check for their own dependencies and print exact install commands on failure. They also
