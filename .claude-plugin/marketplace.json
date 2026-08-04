@@ -59,6 +59,15 @@
       },
       "source": "./plugins/video-analysis",
       "category": "productivity"
+    },
+    {
+      "name": "web-pentest",
+      "description": "Phase-gated authorized web pentest workflow for bug-bounty/VDP targets: Phase 0 scope+RoE gate (hard-stops if out of scope), recon, surface mapping, 8-class checklist testing via Burp Suite MCP, PoC confirmation, and chaining into a structured findings folder. Methodology orchestration, not exploit payloads.",
+      "author": {
+        "name": "Tang Cong Han"
+      },
+      "source": "./plugins/web-pentest",
+      "category": "security"
     }
   ]
 }
