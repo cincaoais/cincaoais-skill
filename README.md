@@ -15,7 +15,7 @@ for a private repo.
 ## Contents
 
 - [Install](#install)
-- [The six plugins at a glance](#the-six-plugins-at-a-glance)
+- [The seven plugins at a glance](#the-seven-plugins-at-a-glance)
 - [Which one do I use?](#which-one-do-i-use)
 - [User guide](#user-guide)
   - [`/video-analysis`](#video-analysis--turn-a-video-into-notes)
@@ -24,6 +24,7 @@ for a private repo.
   - [`/trading-rnd`](#trading-rnd--research-for-the-us-stocks-auto-trading-system)
   - [`/orchestrate`](#orchestrate--plan-expensive-execute-cheap)
   - [`/system-builder`](#system-builder--build-a-whole-system-in-five-gated-phases)
+  - [`/web-pentest`](#web-pentest--run-an-authorized-phase-gated-web-pentest)
 - [video-analysis setup & troubleshooting](#video-analysis-setup--troubleshooting)
 - [video-analysis changes from upstream](#video-analysis-changes-from-upstream)
 - [ebook-lecture-notes changes from upstream](#ebook-lecture-notes-changes-from-upstream)
@@ -65,6 +66,7 @@ ssh -T git@github.com
 /plugin install trading-rnd@claude-skills
 /plugin install orchestrate@claude-skills
 /plugin install system-builder@claude-skills
+/plugin install web-pentest@claude-skills
 ```
 
 Or run `/plugin` with no arguments for the interactive browser.
@@ -97,13 +99,13 @@ active after you install the plugin versions, and you end up with two of each. C
 ls ~/.claude/skills
 ```
 
-If you see `orchestrate`, `rnd`, `trading-rnd`, `system-builder`, `video-analysis`, or
-`ebook-lecture-notes` in there **and** you've installed them from this marketplace, delete the
-loose directories and let the marketplace be the single source of truth.
+If you see `orchestrate`, `rnd`, `trading-rnd`, `system-builder`, `video-analysis`,
+`ebook-lecture-notes`, or `web-pentest` in there **and** you've installed them from this
+marketplace, delete the loose directories and let the marketplace be the single source of truth.
 
 ---
 
-## The six plugins at a glance
+## The seven plugins at a glance
 
 | Plugin | Command | Version | What it does |
 |---|---|---|---|
@@ -113,8 +115,9 @@ loose directories and let the marketplace be the single source of truth.
 | `trading-rnd` | `/trading-rnd` | 1.0.0 | Same, specialised for US-stocks auto-trading, with a fit check against your system |
 | `orchestrate` | `/orchestrate` | 1.0.0 | Plans with the expensive model, fans execution out to parallel Sonnet subagents |
 | `system-builder` | `/system-builder` | 1.0.0 | Phase-gated build workflow: interview → R&D → plan → execute → review |
+| `web-pentest` | `/web-pentest` | 1.0.0 | Phase-gated authorized web pentest: scope/RoE gate, recon, surface mapping, Burp-driven per-class testing, PoC & chaining into a findings folder |
 
-All six are **skills**, so you don't strictly need the slash command. Describing the task in plain
+All seven are **skills**, so you don't strictly need the slash command. Describing the task in plain
 language triggers them too — pasting a YouTube link fires `video-analysis`, saying "summarize this
 book, I don't have time to read it" fires `ebook-lecture-notes`, saying "let's build a habit
 tracker app" fires `system-builder`. The slash command is just the explicit way to ask.
@@ -132,6 +135,7 @@ tracker app" fires `system-builder`. The slash command is just the explicit way 
 | Improve something that already exists (a service, a pipeline, a strategy) | `/rnd` or `/trading-rnd` — both have an "improve" mode |
 | Do one big multi-part task faster and cheaper | `/orchestrate` |
 | Build a whole new system from a vague idea | `/system-builder` |
+| Run an authorized web pentest / bug-bounty assessment | `/web-pentest` |
 
 **`rnd` vs `trading-rnd`** — they overlap on purpose. `trading-rnd` is the specialised path: it
 loads your trading system's context and grades every finding against it. `rnd` handles everything
@@ -796,7 +800,7 @@ Keep `plugin.json` and `marketplace.json` descriptions in sync, and bump `versio
 archives; none recorded an author or a license. The `video-analysis` fixes above are the only
 modifications to that skill; `ebook-lecture-notes` was likewise patched at import — see
 [ebook-lecture-notes changes from upstream](#ebook-lecture-notes-changes-from-upstream);
-`system-builder` is unmodified. `orchestrate`, `rnd`, and `trading-rnd` are personal.
+`system-builder` is unmodified. `orchestrate`, `rnd`, `trading-rnd`, and `web-pentest` are personal.
 
 No license is asserted, because the upstream skills shipped without one. Confirm the original
 terms before making this repository public or redistributing it.
