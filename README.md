@@ -115,7 +115,7 @@ marketplace, delete the loose directories and let the marketplace be the single 
 | `trading-rnd` | `/trading-rnd` | 1.0.0 | Same, specialised for US-stocks auto-trading, with a fit check against your system |
 | `orchestrate` | `/orchestrate` | 1.0.0 | Plans with the expensive model, fans execution out to parallel Sonnet subagents |
 | `system-builder` | `/system-builder` | 1.0.0 | Phase-gated build workflow: interview → R&D → plan → execute → review |
-| `web-pentest` | `/web-pentest` | 1.0.0 | Phase-gated authorized web pentest: scope/RoE gate, recon, surface mapping, Burp-driven per-class testing, PoC & chaining into a findings folder |
+| `web-pentest` | `/web-pentest` | 1.1.0 | Phase-gated authorized web pentest: scope/RoE gate, recon, surface mapping, Burp-driven per-class testing, PoC & chaining into a findings folder (bundles the companion `report-submission` skill) |
 
 All seven are **skills**, so you don't strictly need the slash command. Describing the task in plain
 language triggers them too — pasting a YouTube link fires `video-analysis`, saying "summarize this
@@ -582,6 +582,12 @@ rather than silently waiting or retrying as if nothing changed.
 **Boundaries.** Ships no exploit payloads or canned attack strings — the checklists teach
 methodology, not ready-to-fire code. Not for targets without a named, verified program, and
 never proceeds against a target just because it looks vulnerable.
+
+**Companion `report-submission` skill.** The same plugin also bundles a formatter that turns
+`findings.md` entries into platform-ready report submissions — *"generate a HackerOne report
+for WP-004"* is the kind of phrasing that triggers it. It is **formatter-only**: it never
+submits on your behalf — you review the finished report and submit it yourself. Output covers
+HackerOne, Bugcrowd, Intigriti, and YesWeHack.
 
 ---
 
