@@ -215,7 +215,7 @@ def test_pbo_noise_near_half():
 
 def test_pbo_real_edge_near_zero():
     m = np.random.default_rng(0).normal(0, 0.01, (800, 50))
-    m[:, 7] += 0.0015
+    m[:, 7] += 0.003  # per-period SR 0.3: PBO 0.0 on seeds 0-9 (0.0015 was seed-fragile)
     assert rv.pbo_cscv(m, s=8)["pbo"] < 0.1
 
 
