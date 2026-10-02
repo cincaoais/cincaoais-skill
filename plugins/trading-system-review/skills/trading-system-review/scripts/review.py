@@ -2,17 +2,19 @@
 
 Usage:
   python review.py stats  --trades trades.csv --capital 10000 [--prices prices.csv]
-                          [--variants variants.csv] [--live live.csv] [--dd-limit 0.10]
-                          [--periods-per-year 252] [--recent-days 180] [--sims 10000]
-                          [--seed 0] --out metrics.json
+                          [--variants variants.csv] [--live live.csv] [--live-capital 10000]
+                          [--dd-limit 0.10] [--periods-per-year 252] [--recent-days 180]
+                          [--sims 10000] [--seed 0] --out metrics.json
   python review.py render --metrics metrics.json --scorecard scorecard.json --out report.html [--open]
 
 Inputs (CSV, or .parquet if pyarrow is installed):
   trades / live : entry_time, exit_time, side, pnl  (+ optional symbol, entry, exit, size, r_multiple)
                   side: long/short/buy/sell/1/-1 (case-insensitive); pnl net, account currency;
-                  naive timestamps are read as UTC, aware ones converted to UTC.
+                  closed trades only; naive timestamps read as UTC, aware ones converted to UTC,
+                  integer epoch seconds/ms accepted.
   prices        : time, high, low, close  (any bar size; resampled to daily; regimes use prior day only)
-  variants      : date + one column of daily net returns (fractions) per parameter variant
+  variants      : date + one column of daily net returns (fractions) per parameter variant;
+                  name the current-parameters column "base"; non-numeric columns are ignored
   scorecard     : {system, verdict, dimensions[{name, weight, gate, score 0-5, evidence}], ...optional}
 All ratios in metrics.json are fractions. JSON is strict (NaN/inf -> null).
 """
@@ -38,6 +40,7 @@ from scipy import stats as st  # noqa: E402
 
 warnings.filterwarnings("ignore")
 plt.rcParams["svg.fonttype"] = "none"
+plt.rcParams["text.parse_math"] = False  # untrusted labels: a "$" must not trigger mathtext
 
 RUBRIC = [
     ("edge_thesis", 10, False), ("data_code_integrity", 15, True),
@@ -139,7 +142,17 @@ def normalize(df):
         raise SystemExit("trades file has no rows")
     df = df.copy()
     for c in ("entry_time", "exit_time"):
-        df[c] = pd.to_datetime(df[c], utc=True, format="mixed")
+        if pd.api.types.is_numeric_dtype(df[c]):  # epoch seconds / ms (e.g. MT5 exports)
+            unit = "ms" if df[c].abs().max() > 1e11 else "s"
+            df[c] = pd.to_datetime(df[c], unit=unit, utc=True)
+        else:
+            df[c] = pd.to_datetime(df[c], utc=True, format="mixed")
+    bad = int(df[["entry_time", "exit_time"]].isna().any(axis=1).sum())
+    if bad:
+        raise SystemExit(f"{bad} trade(s) have an empty or unparseable entry_time/exit_time "
+                         "(open trades?) - drop them first")
+    if df["entry_time"].min().year < 1990:
+        raise SystemExit("timestamps parse to before 1990 - check the time unit/format")
     df["side"] = df["side"].map(_side).astype(int)
     df["pnl"] = pd.to_numeric(df["pnl"]).astype(float)
     return df.sort_values("exit_time").reset_index(drop=True)
@@ -308,7 +321,7 @@ def _monte_carlo(pnl, capital, sims, seed, dd_limit):
         out[name] = {"max_dd": {"p50": p50, "p95": p95, "p99": p99},
                      "p_breach": float((d >= dd_limit).mean())}
         if name == "reshuffle":
-            counts, edges = np.histogram(d, bins=40)
+            counts, edges = np.histogram(d, bins=40, range=(0.0, max(float(d.max()), 1e-9)))
             out[name]["hist"] = {"counts": counts, "edges": edges}
     f = np.concatenate(fin) / capital - 1
     p5, p50, p95 = np.percentile(f, [5, 50, 95])
@@ -361,26 +374,45 @@ def _recency(t, recent_days):
             "split_70_30": {"first": _basic(a), "last": _basic(b), "welch_p": _welch(a, b)}}
 
 
-def _live(live, bt, capital, mc, ci):
-    p = live["pnl"].to_numpy()
+def _live(live, bt, capital, sims, seed):
+    p, pb = live["pnl"].to_numpy(), bt["pnl"].to_numpy()
+    n, nb = len(p), len(pb)
     eq = capital + np.cumsum(p)
-    max_dd = float(((np.maximum(np.maximum.accumulate(eq), capital) - eq)
-                    / np.maximum(np.maximum.accumulate(eq), capital)).max())
-    q = mc["reshuffle"]["max_dd"]
-    dd_vs = "above_p99" if max_dd > q["p99"] else "above_p95" if max_dd > q["p95"] else "within"
+    peak = np.maximum(np.maximum.accumulate(eq), capital)
+    max_dd = float(((peak - eq) / peak).max())
+    # Length-matched DD band: n-trade paths bootstrapped from the backtest trades.
+    rng = np.random.default_rng(seed)
+    step = max(1, min(1000, 2_000_000 // max(n, 1)))
+    dds = np.concatenate([_max_dd_paths(pb[rng.integers(0, nb, (min(step, sims - i), n))], capital)[0]
+                          for i in range(0, sims, step)])
+    p95, p99 = np.percentile(dds, [95, 99])
+    dd_vs = "above_p99" if max_dd > p99 else "above_p95" if max_dd > p95 else "within"
     b = _basic(p)
-    inside = None if ci is None else bool(ci[0] <= b["expectancy"] <= ci[1])
-    pb = bt["pnl"].to_numpy()
-    mw = float(st.mannwhitneyu(p, pb).pvalue) if len(p) > 1 else None
-    ks = float(st.ks_2samp(p, pb).pvalue) if len(p) > 1 else None
-    if b["n"] < 50:
+    # Band where an n-trade live mean lands if the edge is unchanged (difference-of-means).
+    inside = None
+    if nb > 1:
+        h = st.t.ppf(0.975, nb - 1) * pb.std(ddof=1) * math.sqrt(1 / n + 1 / nb)
+        inside = bool(abs(b["expectancy"] - pb.mean()) <= h)
+    mw = float(st.mannwhitneyu(p, pb).pvalue) if n > 1 else None
+    ks = float(st.ks_2samp(p, pb).pvalue) if n > 1 else None
+    if n < 50:
         hint = "inconclusive (<50 live trades)"
     elif inside is False or dd_vs != "within":
         hint = "decay_suspected"
     else:
         hint = "consistent"
-    return {**b, "max_dd": max_dd, "welch_p": _welch(p, pb), "mannwhitney_p": mw, "ks_p": ks,
-            "expectancy_in_backtest_ci95": inside, "dd_vs_mc": dd_vs, "hint": hint}
+    return {**b, "max_dd": max_dd, "capital": capital, "dd_band": {"p95": p95, "p99": p99},
+            "welch_p": _welch(p, pb), "mannwhitney_p": mw, "ks_p": ks,
+            "expectancy_in_band95": inside, "dd_vs_mc": dd_vs, "hint": hint}
+
+
+def _variant_summary(v, ppy):
+    """Annualised Sharpe per variant + plateau measures (column 'base' = current parameters)."""
+    sr = v.mean() / v.std(ddof=1).replace(0, np.nan) * math.sqrt(ppy)
+    best = float(sr.max())
+    return {"sharpe": {str(k): x for k, x in sr.items()}, "best": best, "median": float(sr.median()),
+            "share_within_30pct": float((sr >= 0.7 * best).mean()) if best > 0 else None,
+            "base_vs_best": _div(float(sr["base"]), best) if "base" in sr and best > 0 else None}
 
 
 def _clean(o):
@@ -405,11 +437,16 @@ def run_stats(a):
     n = len(t)
     daily = daily_pnl(t, a.periods_per_year)
     r, eqm = _equity(daily, a.capital, a.periods_per_year)
-    variants = None
+    variants, dropped = None, []
     if a.variants:
         v = _read(a.variants)
-        v = v.drop(columns=[c for c in v.columns if c.lower() == "date"])
-        variants = v.apply(pd.to_numeric, errors="coerce").dropna()
+        num = v.apply(pd.to_numeric, errors="coerce")
+        dropped = [c for c in v.columns if str(c).lower() in ("date", "time", "datetime", "timestamp")
+                   or num[c].notna().mean() < 0.9]
+        variants = num.drop(columns=dropped).dropna()
+        if variants.shape[1] < 2 or len(variants) < 20:
+            raise SystemExit(f"variants file needs >= 2 numeric return columns and >= 20 complete rows "
+                             f"(got {variants.shape[1]} columns, {len(variants)} rows; dropped {dropped})")
     ts = _trade_stats(t)
     mc = _monte_carlo(t["pnl"].to_numpy(), a.capital, a.sims, a.seed, a.dd_limit)
     t["regime"] = _regimes(a.prices, t) if a.prices else None
@@ -440,6 +477,8 @@ def run_stats(a):
         warns.append("no prices file: regime breakdown skipped")
     if variants is None:
         warns.append("no variants file: PBO not computed; DSR uses the null grid")
+    elif dropped:
+        warns.append(f"variants file: non-return columns ignored: {', '.join(map(str, dropped))}")
     if not a.live:
         warns.append("no live file: decay not tested")
     out = {
@@ -455,9 +494,10 @@ def run_stats(a):
         "tripwires": {"items": trip, "hits": hits, "curve_fit_suspect": hits >= 3},
         "warnings": warns,
         "pbo": pbo_cscv(variants.to_numpy()) if variants is not None else None,
+        "variants": _variant_summary(variants, a.periods_per_year) if variants is not None else None,
     }
     if a.live:
-        out["live"] = _live(load_trades(a.live), t, a.capital, mc, ts["expectancy_ci95"])
+        out["live"] = _live(load_trades(a.live), t, a.live_capital or a.capital, a.sims, a.seed)
     Path(a.out).write_text(json.dumps(_clean(out), allow_nan=False, indent=1), encoding="utf-8")
     print(f"wrote {a.out} ({n} trades)")
 
@@ -691,7 +731,7 @@ def build_html(m, sc):
         warns.append("Scorecard dimension names or weights differ from the canonical rubric.")
     mdl = sc.get("model") or {}
     ind = sc.get("independence") or {}
-    clean = ind.get("clean")
+    clean = ind.get("clean") is True
     ts, eq = m["trade_stats"], m["equity"]
     dsr, tw = m["deflation"], m["tripwires"]
     S = []
@@ -762,11 +802,14 @@ def build_html(m, sc):
     rrow = lambda lab, b: [lab, b["n"], _num(b["expectancy"]), _pct(b["win_rate"]), _num(b["profit_factor"])]  # noqa: E731
     live = m.get("live")
     lv = "<p>Not provided.</p>" if not live else (
-        _tbl(["Live n", "Expectancy", "Win rate", "PF", "Max DD", "DD vs MC", "In backtest CI", "Welch p", "MW p", "KS p"],
+        _tbl(["Live n", "Expectancy", "Win rate", "PF", "Max DD", "DD vs band", "In expected band", "Welch p", "MW p", "KS p"],
              [[live["n"], _num(live["expectancy"]), _pct(live["win_rate"]), _num(live["profit_factor"]),
-               _pct(live["max_dd"]), live["dd_vs_mc"], live["expectancy_in_backtest_ci95"],
+               _pct(live["max_dd"]), live["dd_vs_mc"], live["expectancy_in_band95"],
                _num(live["welch_p"], 3), _num(live["mannwhitney_p"], 3), _num(live["ks_p"], 3)]], 0)
-        + f'<p><b>{_e(live["hint"])}</b></p>')
+        + f'<p><b>{_e(live["hint"])}</b></p><p class="muted">DD band = p95/p99 max drawdown of '
+          f'{live["n"]}-trade paths bootstrapped from the backtest ({_pct(live["dd_band"]["p95"])} / '
+          f'{_pct(live["dd_band"]["p99"])}) on capital {_num(live["capital"], 0)}. Expected band = where a '
+          f'{live["n"]}-trade mean should land if the edge is unchanged.</p>')
     sec("Recency and live", _tbl(["Slice", "N", "Expectancy", "Win rate", "PF"], [
         rrow(f"last {rc['recent_days']} days", rc["recent"]), rrow("prior", rc["prior"]),
         rrow("first 70%", rc["split_70_30"]["first"]), rrow("last 30%", rc["split_70_30"]["last"])])
@@ -801,7 +844,7 @@ def run_render(a):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("stats")
     s.add_argument("--trades", required=True)
@@ -809,6 +852,7 @@ def main(argv=None):
     s.add_argument("--prices")
     s.add_argument("--variants")
     s.add_argument("--live")
+    s.add_argument("--live-capital", type=float, help="live account size (default: --capital)")
     s.add_argument("--dd-limit", type=float, default=0.10)
     s.add_argument("--periods-per-year", type=int, default=252)
     s.add_argument("--recent-days", type=int, default=180)

@@ -81,13 +81,14 @@ Names and weights must match `RUBRIC` in `scripts/review.py`.
 
 - **5:** At most 5 free parameters, `pbo.pbo` < 0.1, the parameter neighbourhood is a plateau
   (±25% keeps Sharpe within 30% of the best [B aligrithm]), and `recency.split_70_30` holds out of
-  sample.
+  sample. A plateau means `variants.share_within_30pct` ≥ 0.7 and `variants.base_vs_best` ≥ 0.7.
 - **3:** PBO < 0.3 [B aligrithm], with modest out-of-sample degradation.
 - **1:** Any one of: PBO 0.3–0.5, `tripwires.curve_fit_suspect` true, or many parameters with no
   out-of-sample test.
 - **0:** PBO > 0.5, or out-of-sample expectancy ≤ 0 while in-sample looks strong.
 - **Inputs:** free-parameter count from `system-map.md`; `pbo.{pbo, p_oos_loss}`;
-  `variants.csv` dispersion; `recency.split_70_30`; `tripwires`; `deflation.dsr`.
+  `variants.{sharpe, share_within_30pct, base_vs_best}`; `recency.split_70_30`; `tripwires`;
+  `deflation.dsr`.
 
 **Overfitting verdict** (goes in `scorecard.overfitting`):
 
@@ -256,10 +257,13 @@ that can drift apart?
 
 ## Live vs backtest: decay rules [B/H]
 
-- Live max DD above the backtest's MC p95, or above 1.5× the backtest max DD, means review.
-  Above p99 means stop.
-- Live expectancy outside the backtest's 95% CI after at least 50–100 trades means decay is
-  suspected. With fewer trades, the result is inconclusive, not decayed.
+- Live max DD above p95 means review; above p99 means stop. The band is `live.dd_band`: drawdowns
+  of paths the same length as the live record, bootstrapped from backtest trades. Full-length
+  backtest Monte Carlo would be too lenient here. Also review if live DD exceeds 1.5× the backtest
+  max DD.
+- Live expectancy outside the expected band (`live.expectancy_in_band95` false) after at least
+  50–100 trades means decay is suspected. The band is a difference-of-means test sized to the live
+  sample. With fewer trades, the result is inconclusive, not decayed.
 - Separate execution decay (fills, spread, slippage worse than modelled) from edge decay (signals
   worse). Compare live fills with simulated fills before blaming the edge.
 - If it only worked in a regime that has ended, revamp the regime filter. Don't retire the idea yet.

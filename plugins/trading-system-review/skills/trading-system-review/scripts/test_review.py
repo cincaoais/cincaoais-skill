@@ -168,6 +168,64 @@ def test_render_escapes_and_recomputes_score(tmp_path):
     assert "<svg" in html
 
 
+def test_all_losers_does_not_crash(tmp_path):
+    df = make_trades(30)
+    df["pnl"] = -df["pnl"].abs() - 1  # every reshuffle ends at the same DD, +-1e-16 float noise
+    m = run_stats(tmp_path, df)
+    assert m["trade_stats"]["win_rate"] == 0.0
+    assert m["monte_carlo"]["reshuffle"]["max_dd"]["p50"] > 0
+
+
+def test_open_trades_rejected_and_epoch_seconds_parsed(tmp_path):
+    df = make_trades(5)
+    df.loc[2, "exit_time"] = None  # open trade
+    with pytest.raises(SystemExit, match="open trades"):
+        rv.normalize(df)
+    df = make_trades(5)
+    df["entry_time"] = df["entry_time"].astype("int64") // 10**9  # MT5-style epoch seconds
+    df["exit_time"] = df["exit_time"].astype("int64") // 10**9
+    t = rv.normalize(df)
+    assert t["entry_time"].iloc[0] == pd.Timestamp("2023-01-02", tz="UTC")
+
+
+def test_variants_time_column_and_plateau_summary(tmp_path):
+    rng = np.random.default_rng(5)
+    var = pd.DataFrame(rng.normal(0.0005, 0.01, (300, 6)), columns=["base", "a", "b", "c", "d", "e"])
+    var.insert(0, "time", pd.date_range("2023-01-02", periods=300, freq="B"))  # not named "date"
+    var.to_csv(tmp_path / "variants.csv", index=False)
+    m = run_stats(tmp_path, make_trades(), "--variants", str(tmp_path / "variants.csv"))
+    assert m["pbo"]["n_variants"] == 6
+    assert set(m["variants"]["sharpe"]) == {"base", "a", "b", "c", "d", "e"}
+    assert 0 < m["variants"]["share_within_30pct"] <= 1
+    assert m["variants"]["base_vs_best"] is not None
+
+
+def test_live_decay_flags_have_low_false_alarm_and_real_power():
+    flagged_same = flagged_worse = 0
+    for s in range(10):
+        bt = rv.normalize(make_trades(2000, seed=s))
+        same = rv.normalize(make_trades(60, seed=100 + s, start="2024-06-03"))
+        worse = rv.normalize(make_trades(60, seed=200 + s, edge=-0.3, start="2024-06-03"))
+        flagged_same += rv._live(same, bt, 10000, 500, s)["hint"] == "decay_suspected"
+        flagged_worse += rv._live(worse, bt, 10000, 500, s)["hint"] == "decay_suspected"
+    assert flagged_same <= 3   # healthy system rarely flagged (was ~75% before the fix)
+    assert flagged_worse >= 7  # a clearly worse live edge is caught
+
+
+def test_render_survives_dollar_names_and_string_flags(tmp_path):
+    run_stats(tmp_path, make_trades())
+    dims = [{"name": n, "weight": w, "gate": g, "score": 3, "evidence": "e"} for n, w, g in rv.RUBRIC]
+    dims[5]["name"] = "cost $x^$ thing"
+    sc = {"system": "s", "verdict": "INCUBATE", "dimensions": dims,
+          "independence": {"clean": "false"}}
+    (tmp_path / "scorecard.json").write_text(json.dumps(sc), encoding="utf-8")
+    out = tmp_path / "r.html"
+    rv.main(["render", "--metrics", str(tmp_path / "metrics.json"),
+             "--scorecard", str(tmp_path / "scorecard.json"), "--out", str(out)])
+    html = out.read_text(encoding="utf-8")
+    assert "Independence not guaranteed" in html
+
+
 def test_render_rejects_bad_scorecard(tmp_path):
     run_stats(tmp_path, make_trades())
     (tmp_path / "scorecard.json").write_text(json.dumps({"system": "x", "verdict": "YOLO",

@@ -611,7 +611,7 @@ It ends in an offline HTML report with charts.
 **How to invoke**, ideally in a clean session started from a folder with no `CLAUDE.md`:
 
 ```powershell
-$env:CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1"; claude
+$env:CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1"; claude --model best
 ```
 ```
 /trading-system-review C:\path\to\your-trading-repo

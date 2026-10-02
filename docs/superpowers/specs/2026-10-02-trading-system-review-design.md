@@ -125,7 +125,7 @@ plugins/trading-system-review/
 
 ```
 python review.py stats  --trades trades.csv --capital 10000 [--prices prices.csv] [--variants variants.csv]
-                        [--live live.csv] [--dd-limit 0.10] [--periods-per-year 252] [--recent-days 180]
+                        [--live live.csv] [--live-capital C] [--dd-limit 0.10] [--periods-per-year 252] [--recent-days 180]
                         [--sims 10000] [--seed 0] --out metrics.json
 python review.py render --metrics metrics.json --scorecard scorecard.json --out report.html
 ```
