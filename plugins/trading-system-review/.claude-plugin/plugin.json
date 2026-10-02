@@ -1,0 +1,8 @@
+{
+  "name": "trading-system-review",
+  "description": "Fresh-eyes senior-trader review of an existing algorithmic trading system: re-runs the backtest, computes deflated Sharpe / PBO / Monte Carlo / regime stats with a bundled script, researches today's market and new techniques on the web (CloakBrowser fallback), scores a 10-dimension rubric with hard gates, and renders an offline HTML report with charts and a deploy / incubate / revamp / retire verdict. Delegates through the orchestrate skill.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Tang Cong Han"
+  }
+}

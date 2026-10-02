@@ -15,7 +15,7 @@ for a private repo.
 ## Contents
 
 - [Install](#install)
-- [The seven plugins at a glance](#the-seven-plugins-at-a-glance)
+- [The eight plugins at a glance](#the-eight-plugins-at-a-glance)
 - [Which one do I use?](#which-one-do-i-use)
 - [User guide](#user-guide)
   - [`/video-analysis`](#video-analysis--turn-a-video-into-notes)
@@ -25,6 +25,7 @@ for a private repo.
   - [`/orchestrate`](#orchestrate--plan-expensive-execute-cheap)
   - [`/system-builder`](#system-builder--build-a-whole-system-in-five-gated-phases)
   - [`/web-pentest`](#web-pentest--run-an-authorized-phase-gated-web-pentest)
+  - [`/trading-system-review`](#trading-system-review--a-senior-traders-verdict-on-an-existing-system)
 - [video-analysis setup & troubleshooting](#video-analysis-setup--troubleshooting)
 - [video-analysis changes from upstream](#video-analysis-changes-from-upstream)
 - [ebook-lecture-notes changes from upstream](#ebook-lecture-notes-changes-from-upstream)
@@ -67,6 +68,7 @@ ssh -T git@github.com
 /plugin install orchestrate@claude-skills
 /plugin install system-builder@claude-skills
 /plugin install web-pentest@claude-skills
+/plugin install trading-system-review@claude-skills
 ```
 
 Or run `/plugin` with no arguments for the interactive browser.
@@ -100,12 +102,12 @@ ls ~/.claude/skills
 ```
 
 If you see `orchestrate`, `rnd`, `trading-rnd`, `system-builder`, `video-analysis`,
-`ebook-lecture-notes`, or `web-pentest` in there **and** you've installed them from this
+`ebook-lecture-notes`, `web-pentest`, or `trading-system-review` in there **and** you've installed them from this
 marketplace, delete the loose directories and let the marketplace be the single source of truth.
 
 ---
 
-## The seven plugins at a glance
+## The eight plugins at a glance
 
 | Plugin | Command | Version | What it does |
 |---|---|---|---|
@@ -116,8 +118,9 @@ marketplace, delete the loose directories and let the marketplace be the single 
 | `orchestrate` | `/orchestrate` | 1.0.0 | Plans with the expensive model, fans execution out to parallel Sonnet subagents |
 | `system-builder` | `/system-builder` | 1.0.0 | Phase-gated build workflow: interview → R&D → plan → execute → review |
 | `web-pentest` | `/web-pentest` | 1.1.0 | Phase-gated authorized web pentest: scope/RoE gate, recon, surface mapping, Burp-driven per-class testing, PoC & chaining into a findings folder (bundles the companion `report-submission` skill) |
+| `trading-system-review` | `/trading-system-review` | 1.0.0 | Fresh-eyes senior-trader review of an existing trading system: fresh backtest, deflated Sharpe / PBO / Monte Carlo stats, today's-market research, gated rubric → offline HTML report with a deploy / incubate / revamp / retire verdict |
 
-All seven are **skills**, so you don't strictly need the slash command. Describing the task in plain
+All eight are **skills**, so you don't strictly need the slash command. Describing the task in plain
 language triggers them too — pasting a YouTube link fires `video-analysis`, saying "summarize this
 book, I don't have time to read it" fires `ebook-lecture-notes`, saying "let's build a habit
 tracker app" fires `system-builder`. The slash command is just the explicit way to ask.
@@ -136,6 +139,7 @@ tracker app" fires `system-builder`. The slash command is just the explicit way 
 | Do one big multi-part task faster and cheaper | `/orchestrate` |
 | Build a whole new system from a vague idea | `/system-builder` |
 | Run an authorized web pentest / bug-bounty assessment | `/web-pentest` |
+| Find out if an existing trading system still works, is overfitted, or is outdated | `/trading-system-review` |
 
 **`rnd` vs `trading-rnd`** — they overlap on purpose. `trading-rnd` is the specialised path: it
 loads your trading system's context and grades every finding against it. `rnd` handles everything
@@ -591,6 +595,67 @@ HackerOne, Bugcrowd, Intigriti, and YesWeHack.
 
 ---
 
+### `/trading-system-review` — a senior trader's verdict on an existing system
+
+**What it does.** Rates one of your trading-system repos with fresh eyes, the way a prop-desk head
+would. It answers:
+
+- Is there an edge?
+- Is it real or overfitted?
+- Is it still in line with today's market?
+- What's outdated, and what's worth adding?
+- Deploy, incubate, revamp or retire?
+
+It ends in an offline HTML report with charts.
+
+**How to invoke**, ideally in a clean session started from a folder with no `CLAUDE.md`:
+
+```powershell
+$env:CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1"; claude
+```
+```
+/trading-system-review C:\path\to\your-trading-repo
+```
+
+**Why the clean session.** "Fresh eyes" means it must not lean on old conclusions. Skill
+instructions can't unload auto-memory, so the skill checks its own context first and tells you if
+it's contaminated. It also tells every subagent to skip prior research, plans, audits and stored
+reports.
+
+**What happens**
+
+| Phase | Output in `trading-reviews/<system>-<date>/` | What it does |
+|---|---|---|
+| **0 — Independence gate** | — | Confirms the target, states the model, its knowledge cutoff and today's date, and runs the contamination check. |
+| **1 — System map** | `system-map.md` | A subagent maps the rules, parameters, data coverage, backtest command and forward logs. |
+| **2 — Senior-trader plan** | `review-plan.md` | The strongest model (`model: best`) sets the edge thesis, top risks, the backtest and parameter-grid plan, filled search queries, and which model handles each work item. |
+| **3 — Execute** | `code-audit.md`, `metrics.json`, `market-research.md`, `techniques-research.md` | Run in parallel through `orchestrate`: code-integrity audit (Opus); fresh backtest + `review.py stats` (Sonnet); today's market and venue/prop-rule changes (Sonnet); new techniques, evidence vs hype (Sonnet). |
+| **4 — Score** | `scorecard.json` | Verifies the claims, scores 10 dimensions (two hard gates: code integrity and overfitting control), and writes the verdict and revamp plan. |
+| **5 — Report** | `report.html` | `review.py render` builds the report and opens it. |
+
+**Numbers come from code, not the model.** The bundled `scripts/review.py` computes:
+
+- trade stats with confidence intervals
+- PSR, Deflated Sharpe and MinTRL (Bailey & López de Prado)
+- PBO via CSCV when parameter variants exist
+- Monte Carlo drawdown percentiles against your prop-firm limit
+- year, session and regime breakdowns
+- recent vs earlier performance
+- live-vs-backtest decay tests
+- curve-fit tripwires
+
+The renderer recomputes the weighted score itself and flags a verdict that contradicts the rubric.
+
+**Web research** uses the session's search tool. Bot-blocked pages are fetched with
+[CloakBrowser](https://github.com/CloakHQ/CloakBrowser) (`pip install cloakbrowser`), not the
+Chrome extension.
+
+**Needs:** Python with numpy, pandas, scipy and matplotlib. Install `orchestrate` too, since
+delegation goes through it. This is research, not financial advice. The target repo stays
+read-only, apart from files its own backtest writes, and those are listed in `backtest-notes.md`.
+
+---
+
 ## video-analysis setup & troubleshooting
 
 The scripts check for their own dependencies and print exact install commands on failure. They also
@@ -785,7 +850,7 @@ plugins/<name>/
   skills/<name>/
     SKILL.md                        # the skill itself (frontmatter: name + description)
     references/                     # templates and context files, read on demand
-    scripts/                        # executable helpers (video-analysis, ebook-lecture-notes)
+    scripts/                        # executable helpers (video-analysis, ebook-lecture-notes, trading-system-review)
     assets/                         # chart template (ebook-lecture-notes only)
 ```
 
@@ -806,7 +871,7 @@ Keep `plugin.json` and `marketplace.json` descriptions in sync, and bump `versio
 archives; none recorded an author or a license. The `video-analysis` fixes above are the only
 modifications to that skill; `ebook-lecture-notes` was likewise patched at import — see
 [ebook-lecture-notes changes from upstream](#ebook-lecture-notes-changes-from-upstream);
-`system-builder` is unmodified. `orchestrate`, `rnd`, `trading-rnd`, and `web-pentest` are personal.
+`system-builder` is unmodified. `orchestrate`, `rnd`, `trading-rnd`, `web-pentest`, and `trading-system-review` are personal.
 
 No license is asserted, because the upstream skills shipped without one. Confirm the original
 terms before making this repository public or redistributing it.

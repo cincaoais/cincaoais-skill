@@ -43,6 +43,15 @@
       "category": "development"
     },
     {
+      "name": "trading-system-review",
+      "description": "Fresh-eyes senior-trader review of an existing trading system: fresh backtest, deflated Sharpe / PBO / Monte Carlo / regime stats, today's-market web research, a 10-dimension gated rubric, and an offline HTML report with a deploy / incubate / revamp / retire verdict.",
+      "author": {
+        "name": "Tang Cong Han"
+      },
+      "source": "./plugins/trading-system-review",
+      "category": "productivity"
+    },
+    {
       "name": "trading-rnd",
       "description": "Deep R&D investigation pipeline for US-stocks auto-trading topics — strategies, indicators, market data, broker capabilities, risk management, and backtesting — producing a structured report with a feasibility assessment.",
       "author": {
