@@ -1,0 +1,23 @@
+{
+  "skill_name": "code-mentor",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "ok so i vibe coded this whole next.js + supabase habit tracker with cursor last month and it works but i honestly dont understand anything in it. like why is there a middleware.ts and a lib folder and what is the supabase folder for?? can you teach me how this thing works. im pretty new to coding",
+      "expected_output": "Treats the learner as new to coding without re-asking. Maps the repo without editing it. Writes learning/<date>-whole-project/LESSON.md with an architecture flowchart, a golden-path sequence diagram and a data-model ER diagram, all labelled with real file paths. Explains why middleware.ts, lib/ and supabase/ live where they do. Builds index.html with the viewer script. Teaches in chat with check questions instead of pasting the lesson.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I'm a Django dev and I generated this FastAPI service with Claude for a side project. Walk me through how a request to POST /orders flows through it and why it's split into routers/, services/ and repositories/, then quiz me with 8 questions.",
+      "expected_output": "Scopes to the POST /orders flow and maps FastAPI concepts onto Django equivalents. The sequence diagram traces router, service, repository and database with path:line pointers. Writes QUIZ.md with exactly 8 A-D questions and no answers, and ANSWERS.md with the key, explanations and why each wrong option is wrong. Offers the quiz interactively.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "quiz me on this repo. I already read the lesson you made yesterday in learning/2026-10-02-whole-project so no need to explain it again, I just want to test myself",
+      "expected_output": "Skips re-teaching. Reads the existing LESSON.md, re-checks it against the code, writes QUIZ.md and ANSWERS.md into that folder, rebuilds the viewer, runs the quiz with AskUserQuestion in batches of up to 4, and appends a scored attempt with a revisit list to ANSWERS.md.",
+      "files": []
+    }
+  ]
+}
