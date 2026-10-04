@@ -15,7 +15,7 @@ for a private repo.
 ## Contents
 
 - [Install](#install)
-- [The eight plugins at a glance](#the-eight-plugins-at-a-glance)
+- [The nine plugins at a glance](#the-nine-plugins-at-a-glance)
 - [Which one do I use?](#which-one-do-i-use)
 - [User guide](#user-guide)
   - [`/video-analysis`](#video-analysis--turn-a-video-into-notes)
@@ -26,6 +26,7 @@ for a private repo.
   - [`/system-builder`](#system-builder--build-a-whole-system-in-five-gated-phases)
   - [`/web-pentest`](#web-pentest--run-an-authorized-phase-gated-web-pentest)
   - [`/trading-system-review`](#trading-system-review--a-senior-traders-verdict-on-an-existing-system)
+  - [`/find-skills`](#find-skills--find-a-skill-for-anything)
 - [video-analysis setup & troubleshooting](#video-analysis-setup--troubleshooting)
 - [video-analysis changes from upstream](#video-analysis-changes-from-upstream)
 - [ebook-lecture-notes changes from upstream](#ebook-lecture-notes-changes-from-upstream)
@@ -69,6 +70,7 @@ ssh -T git@github.com
 /plugin install system-builder@claude-skills
 /plugin install web-pentest@claude-skills
 /plugin install trading-system-review@claude-skills
+/plugin install find-skills@claude-skills
 ```
 
 Or run `/plugin` with no arguments for the interactive browser.
@@ -102,12 +104,12 @@ ls ~/.claude/skills
 ```
 
 If you see `orchestrate`, `rnd`, `trading-rnd`, `system-builder`, `video-analysis`,
-`ebook-lecture-notes`, `web-pentest`, or `trading-system-review` in there **and** you've installed them from this
+`ebook-lecture-notes`, `web-pentest`, `trading-system-review`, or `find-skills` in there **and** you've installed them from this
 marketplace, delete the loose directories and let the marketplace be the single source of truth.
 
 ---
 
-## The eight plugins at a glance
+## The nine plugins at a glance
 
 | Plugin | Command | Version | What it does |
 |---|---|---|---|
@@ -119,8 +121,9 @@ marketplace, delete the loose directories and let the marketplace be the single 
 | `system-builder` | `/system-builder` | 1.0.0 | Phase-gated build workflow: interview → R&D → plan → execute → review |
 | `web-pentest` | `/web-pentest` | 1.1.0 | Phase-gated authorized web pentest: scope/RoE gate, recon, surface mapping, Burp-driven per-class testing, PoC & chaining into a findings folder (bundles the companion `report-submission` skill) |
 | `trading-system-review` | `/trading-system-review` | 1.0.0 | Fresh-eyes senior-trader review of an existing trading system: fresh backtest, deflated Sharpe / PBO / Monte Carlo stats, today's-market research, gated rubric → offline HTML report with a deploy / incubate / revamp / retire verdict |
+| `find-skills` | `/find-skills` | 1.0.0 | Searches the open skills.sh ecosystem for an existing skill for a task, vets it (installs, source reputation, GitHub stars) before recommending, and installs it |
 
-All eight are **skills**, so you don't strictly need the slash command. Describing the task in plain
+All nine are **skills**, so you don't strictly need the slash command. Describing the task in plain
 language triggers them too — pasting a YouTube link fires `video-analysis`, saying "summarize this
 book, I don't have time to read it" fires `ebook-lecture-notes`, saying "let's build a habit
 tracker app" fires `system-builder`. The slash command is just the explicit way to ask.
@@ -140,6 +143,7 @@ tracker app" fires `system-builder`. The slash command is just the explicit way 
 | Build a whole new system from a vague idea | `/system-builder` |
 | Run an authorized web pentest / bug-bounty assessment | `/web-pentest` |
 | Find out if an existing trading system still works, is overfitted, or is outdated | `/trading-system-review` |
+| Find an installable skill for a task before building the capability by hand | `/find-skills` |
 
 **`rnd` vs `trading-rnd`** — they overlap on purpose. `trading-rnd` is the specialised path: it
 loads your trading system's context and grades every finding against it. `rnd` handles everything
@@ -656,6 +660,40 @@ read-only, apart from files its own backtest writes, and those are listed in `ba
 
 ---
 
+### `/find-skills` — find a skill for anything
+
+**What it does.** Before building a capability by hand, checks the open agent-skills ecosystem
+([skills.sh](https://skills.sh/)) for an existing, battle-tested skill and installs it.
+
+**How to invoke**
+
+```
+/find-skills changelog
+/find-skills react performance
+```
+
+Plain language works too — *"is there a skill for PR reviews?"*, *"I wish I had help setting up
+docker"*, *"can you do X?"* where X smells like a solved problem.
+
+**What happens**
+
+1. **Leaderboard first.** Checks [skills.sh](https://skills.sh/) for a well-known skill in the
+   domain before searching — `vercel-labs`, `anthropics`, and `microsoft` sources are the
+   trusted ones.
+2. **Search.** `npx skills find <query>` with specific keywords, trying alternative terms when
+   a query comes back empty.
+3. **Vet before recommending.** Install count (1K+ preferred, under 100 treated with
+   suspicion), source reputation, and GitHub stars on the source repo. Never recommends off
+   search results alone.
+4. **Present or install.** Shortlist with what each skill does, its install count, source, and
+   the exact `npx skills add <owner/repo@skill> -g -y` command; installs on request. When
+   nothing exists, it says so and offers to do the task directly — or scaffold your own skill
+   with `npx skills init`.
+
+**Requirements.** Node/npm — everything runs through `npx skills`.
+
+---
+
 ## video-analysis setup & troubleshooting
 
 The scripts check for their own dependencies and print exact install commands on failure. They also
@@ -872,6 +910,8 @@ archives; none recorded an author or a license. The `video-analysis` fixes above
 modifications to that skill; `ebook-lecture-notes` was likewise patched at import — see
 [ebook-lecture-notes changes from upstream](#ebook-lecture-notes-changes-from-upstream);
 `system-builder` is unmodified. `orchestrate`, `rnd`, `trading-rnd`, `web-pentest`, and `trading-system-review` are personal.
+`find-skills` comes from the open skills ecosystem distributed alongside the `skills` CLI
+([skills.sh](https://skills.sh/)) and is included essentially unmodified.
 
 No license is asserted, because the upstream skills shipped without one. Confirm the original
 terms before making this repository public or redistributing it.

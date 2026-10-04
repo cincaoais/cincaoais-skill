@@ -1,0 +1,8 @@
+{
+  "name": "find-skills",
+  "description": "Discovers and installs agent skills from the open skills.sh ecosystem — checks the leaderboard, searches the skills CLI, vets quality (install count, source reputation, GitHub stars) before recommending, and installs the right skill for a task.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Tang Cong Han"
+  }
+}

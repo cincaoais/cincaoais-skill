@@ -16,6 +16,15 @@
       "category": "productivity"
     },
     {
+      "name": "find-skills",
+      "description": "Discovers and installs agent skills from the open skills.sh ecosystem — checks the leaderboard, searches the skills CLI, vets quality (install count, source reputation, GitHub stars) before recommending, and installs the right skill for a task.",
+      "author": {
+        "name": "Tang Cong Han"
+      },
+      "source": "./plugins/find-skills",
+      "category": "productivity"
+    },
+    {
       "name": "orchestrate",
       "description": "Plan with the expensive model, execute with cheap parallel subagents. Produces a concrete plan using the session's active model (Opus/Fable), then fans the well-specified grunt work out to parallel Sonnet subagents to save tokens.",
       "author": {
