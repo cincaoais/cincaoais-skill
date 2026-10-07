@@ -43,6 +43,15 @@
       "category": "productivity"
     },
     {
+      "name": "skill-scout",
+      "description": "Before a substantial task, finds existing agent skills that fit it, vets and security-reviews them, installs only the ones you approve, then continues the task.",
+      "author": {
+        "name": "Snapdec Sdn Bhd"
+      },
+      "source": "./plugins/skill-scout",
+      "category": "productivity"
+    },
+    {
       "name": "system-builder",
       "description": "Phase-gated workflow for building a new system end to end: kickoff interview, multi-agent R&D, detailed planning, subagent code execution, then review and demo. Pairs with the orchestrate plugin when installed.",
       "author": {

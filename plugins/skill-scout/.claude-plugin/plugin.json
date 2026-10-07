@@ -1,0 +1,11 @@
+{
+  "name": "skill-scout",
+  "displayName": "Skill Scout",
+  "version": "0.1.0",
+  "description": "Before a substantial task, finds existing agent skills that fit it, vets and security-reviews them, installs only the ones you approve, then continues the task.",
+  "author": {
+    "name": "Snapdec Sdn Bhd"
+  },
+  "license": "MIT",
+  "keywords": ["skills", "discovery", "skills.sh", "security-review", "productivity"]
+}
