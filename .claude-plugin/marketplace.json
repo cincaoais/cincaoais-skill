@@ -95,6 +95,15 @@
       },
       "source": "./plugins/web-pentest",
       "category": "security"
+    },
+    {
+      "name": "smart-money-concepts",
+      "description": "Knowledge base from two Smart Money Concepts (SMC) ebooks (Frank Miller 2024, and the anonymous E-book Smart Money SMC): market structure, BOS/CHoCH, inducement, liquidity sweeps, order blocks, FVG, POI, premium/discount, with testable algorithmic definitions and a book-comparison of where they disagree.",
+      "author": {
+        "name": "Tang Cong Han"
+      },
+      "source": "./plugins/smart-money-concepts",
+      "category": "productivity"
     }
   ]
 }

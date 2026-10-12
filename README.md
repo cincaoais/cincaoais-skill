@@ -71,6 +71,7 @@ ssh -T git@github.com
 /plugin install web-pentest@claude-skills
 /plugin install trading-system-review@claude-skills
 /plugin install find-skills@claude-skills
+/plugin install smart-money-concepts@claude-skills
 ```
 
 Or run `/plugin` with no arguments for the interactive browser.
@@ -122,6 +123,7 @@ marketplace, delete the loose directories and let the marketplace be the single 
 | `web-pentest` | `/web-pentest` | 1.1.0 | Phase-gated authorized web pentest: scope/RoE gate, recon, surface mapping, Burp-driven per-class testing, PoC & chaining into a findings folder (bundles the companion `report-submission` skill) |
 | `trading-system-review` | `/trading-system-review` | 1.0.0 | Fresh-eyes senior-trader review of an existing trading system: fresh backtest, deflated Sharpe / PBO / Monte Carlo stats, today's-market research, gated rubric → offline HTML report with a deploy / incubate / revamp / retire verdict |
 | `find-skills` | `/find-skills` | 1.0.0 | Searches the open skills.sh ecosystem for an existing skill for a task, vets it (installs, source reputation, GitHub stars) before recommending, and installs it |
+| `smart-money-concepts` | `/smart-money-concepts` | 1.0.0 | Two-book SMC knowledge base: structure, BOS/CHoCH, inducement, sweeps, order blocks, FVG, premium/discount, with testable algorithmic definitions and where the books disagree |
 
 All nine are **skills**, so you don't strictly need the slash command. Describing the task in plain
 language triggers them too — pasting a YouTube link fires `video-analysis`, saying "summarize this
