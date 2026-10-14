@@ -1,0 +1,39 @@
+/* Base theme for codebase-teacher handbooks: colour tokens (light + dark), type,
+   tables, code, and the shared .card/.note/.eyebrow/.kicker/.meta/.rule pieces.
+   build_handbook.py inlines this file, then appends its page-specific CSS. */
+:root{
+  color-scheme:light dark;
+  --bg:#fbfaf7;--surface:#f2f0ea;--ink:#1d1f23;--ink2:#474b53;--mute:#7a7e86;--rule:#dedad0;
+  --accent:#2f6f5e;--accent-ink:#245a4c;--tint:#e3efe9;--warm:#f6ead2;--warm-ink:#7a5410;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#15171a;--surface:#1d2024;--ink:#e7e5df;--ink2:#b9b7b0;--mute:#8a8c90;--rule:#30343a;
+  --accent:#5fb79c;--accent-ink:#86d0b8;--tint:#1f3530;--warm:#3a2f1a;--warm-ink:#e6c37e;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.65 "IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,h5{font-family:Manrope,"IBM Plex Sans",sans-serif;line-height:1.25;letter-spacing:-.01em;text-wrap:balance}
+h1{font-size:38px;font-weight:700;letter-spacing:-.025em;margin:6px 0 8px}
+h2{font-size:27px;font-weight:700}
+h3{font-size:20px;font-weight:600}
+h4{font-size:16.5px;font-weight:600}
+h5{font-size:15px;font-weight:600}
+a{color:var(--accent-ink);text-underline-offset:2px}
+a:hover{color:var(--accent)}
+strong{font-weight:600}
+code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.88em;background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:.05em .3em}
+pre{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:12px 14px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:none;padding:0;font-size:13px;line-height:1.55;white-space:pre}
+.tblwrap{overflow-x:auto;margin:14px 0}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:7px 10px;border-bottom:1px solid var(--rule)}
+th{font-weight:600;color:var(--ink2);border-bottom-width:2px}
+.eyebrow,.kicker{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.eyebrow{color:var(--accent-ink)}
+.kicker{display:block;margin-bottom:4px}
+.meta{color:var(--ink2);font-size:15px;margin:0 0 8px}
+.rule{height:1px;background:var(--rule);margin:22px 0}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px 18px}
+.card table td:first-child{color:var(--mute);white-space:nowrap;width:1%}
+.note{border-left:3px solid var(--accent);background:var(--tint);border-radius:0 8px 8px 0;padding:10px 14px;margin:14px 0}
+@media print{body{background:#fff;color:#000;font-size:12pt}.card,pre,.note{break-inside:avoid}}

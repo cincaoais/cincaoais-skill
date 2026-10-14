@@ -4,10 +4,7 @@ A personal [Claude Code](https://claude.com/claude-code) plugin marketplace. Ski
 so adding the marketplace once on each machine or account keeps them updated from a single source
 of truth.
 
-This repository is **private**. The install commands below use the SSH remote, which is what works
-for a private repo.
-
-- **Repo:** `git@github.com:cincaoais/claude-skill-marketplace.git`
+- **Repo:** [`cincaoais/cincaoais-skill`](https://github.com/cincaoais/cincaoais-skill) (public)
 - **Marketplace name (used in install commands):** `claude-skills`
 
 ---
@@ -15,20 +12,17 @@ for a private repo.
 ## Contents
 
 - [Install](#install)
-- [The nine plugins at a glance](#the-nine-plugins-at-a-glance)
+- [The eight plugins at a glance](#the-eight-plugins-at-a-glance)
 - [Which one do I use?](#which-one-do-i-use)
 - [User guide](#user-guide)
-  - [`/video-analysis`](#video-analysis--turn-a-video-into-notes)
+  - [`/codebase-teacher`](#codebase-teacher--turn-an-existing-codebase-into-a-teaching-handbook)
   - [`/ebook-lecture-notes`](#ebook-lecture-notes--turn-a-book-into-notes-youll-actually-read)
   - [`/rnd`](#rnd--research-anything-before-building-it)
-  - [`/trading-rnd`](#trading-rnd--research-for-the-us-stocks-auto-trading-system)
   - [`/orchestrate`](#orchestrate--plan-expensive-execute-cheap)
   - [`/system-builder`](#system-builder--build-a-whole-system-in-five-gated-phases)
-  - [`/web-pentest`](#web-pentest--run-an-authorized-phase-gated-web-pentest)
   - [`/trading-system-review`](#trading-system-review--a-senior-traders-verdict-on-an-existing-system)
-  - [`/find-skills`](#find-skills--find-a-skill-for-anything)
-- [video-analysis setup & troubleshooting](#video-analysis-setup--troubleshooting)
-- [video-analysis changes from upstream](#video-analysis-changes-from-upstream)
+  - [`/skill-scout`](#skill-scout--check-for-an-existing-skill-before-a-big-task)
+  - [`/smart-money-concepts`](#smart-money-concepts--a-two-book-smc-knowledge-base)
 - [ebook-lecture-notes changes from upstream](#ebook-lecture-notes-changes-from-upstream)
 - [Repo layout](#repo-layout)
 - [Attribution](#attribution)
@@ -41,36 +35,23 @@ for a private repo.
 ### 1. Add the marketplace — once per machine or account
 
 ```
-/plugin marketplace add git@github.com:cincaoais/claude-skill-marketplace.git
+/plugin marketplace add cincaoais/cincaoais-skill
 ```
 
 This registers the marketplace under the name **`claude-skills`** (taken from
-`.claude-plugin/marketplace.json`), which is the name every later command uses.
-
-> **Why the SSH URL and not `cincaoais/claude-skill-marketplace`?** The `owner/repo` shorthand
-> resolves through GitHub's public API, so it won't reach a private repo unless you have GitHub
-> auth wired up. The SSH URL uses your existing SSH key. If you ever make the repo public, the
-> shorthand is `cincaoais/claude-skill-marketplace` — note it is **`claude-skill`**, singular,
-> even though the local folder is `claude-skills-marketplace`.
-
-Requires an SSH key registered with GitHub. Check with:
-
-```bash
-ssh -T git@github.com
-```
+`.claude-plugin/marketplace.json`), which is the name every later command uses. The SSH form,
+`/plugin marketplace add git@github.com:cincaoais/cincaoais-skill.git`, works too.
 
 ### 2. Install the plugins you want
 
 ```
-/plugin install video-analysis@claude-skills
+/plugin install codebase-teacher@claude-skills
 /plugin install ebook-lecture-notes@claude-skills
 /plugin install rnd@claude-skills
-/plugin install trading-rnd@claude-skills
 /plugin install orchestrate@claude-skills
 /plugin install system-builder@claude-skills
-/plugin install web-pentest@claude-skills
 /plugin install trading-system-review@claude-skills
-/plugin install find-skills@claude-skills
+/plugin install skill-scout@claude-skills
 /plugin install smart-money-concepts@claude-skills
 ```
 
@@ -78,7 +59,8 @@ Or run `/plugin` with no arguments for the interactive browser.
 
 ### 3. Restart Claude Code
 
-Skills are loaded at session start. Restart before expecting the new commands to appear.
+Skills are loaded at session start. Restart (or run `/reload-plugins`) before expecting the new
+commands to appear.
 
 ### Updating
 
@@ -91,9 +73,13 @@ Then reinstall or update the individual plugins if a version bumped.
 ### Removing
 
 ```
-/plugin uninstall video-analysis@claude-skills
+/plugin uninstall rnd@claude-skills
 /plugin marketplace remove claude-skills
 ```
+
+**Plugins dropped from this marketplace** (`trading-rnd`, `find-skills`, `video-analysis`,
+`web-pentest`) stay installed on machines that already have them until you uninstall them:
+`/plugin uninstall <name>@claude-skills`.
 
 ### ⚠️ Watch for duplicate copies in `~/.claude/skills/`
 
@@ -104,31 +90,28 @@ active after you install the plugin versions, and you end up with two of each. C
 ls ~/.claude/skills
 ```
 
-If you see `orchestrate`, `rnd`, `trading-rnd`, `system-builder`, `video-analysis`,
-`ebook-lecture-notes`, `web-pentest`, `trading-system-review`, or `find-skills` in there **and** you've installed them from this
+If you see any of the plugin names below in there **and** you've installed them from this
 marketplace, delete the loose directories and let the marketplace be the single source of truth.
 
 ---
 
-## The nine plugins at a glance
+## The eight plugins at a glance
 
 | Plugin | Command | Version | What it does |
 |---|---|---|---|
-| `video-analysis` | `/video-analysis` | 1.1.1 | Turns a video URL or local file into structured, timestamped knowledge notes |
+| `codebase-teacher` | `/codebase-teacher` | 1.0.0 | Reverse-engineers an existing codebase read-only into an evidence-labelled HTML teaching handbook, with a script-checked file-coverage ledger and build/test verification |
 | `ebook-lecture-notes` | `/ebook-lecture-notes` | 1.1.0 | Turns an ebook or a folder of ebooks into layered lecturer-voice study notes, with charts and a self-test |
-| `rnd` | `/rnd` | 1.0.0 | Researches any topic → decision-ready report + Claude Code handoff prompt |
-| `trading-rnd` | `/trading-rnd` | 1.0.0 | Same, specialised for US-stocks auto-trading, with a fit check against your system |
+| `rnd` | `/rnd` | 1.0.1 | Researches any topic → decision-ready report + Claude Code handoff prompt |
 | `orchestrate` | `/orchestrate` | 1.0.0 | Plans with the expensive model, fans execution out to parallel Sonnet subagents |
 | `system-builder` | `/system-builder` | 1.0.0 | Phase-gated build workflow: interview → R&D → plan → execute → review |
-| `web-pentest` | `/web-pentest` | 1.1.0 | Phase-gated authorized web pentest: scope/RoE gate, recon, surface mapping, Burp-driven per-class testing, PoC & chaining into a findings folder (bundles the companion `report-submission` skill) |
-| `trading-system-review` | `/trading-system-review` | 1.0.0 | Fresh-eyes senior-trader review of an existing trading system: fresh backtest, deflated Sharpe / PBO / Monte Carlo stats, today's-market research, gated rubric → offline HTML report with a deploy / incubate / revamp / retire verdict |
-| `find-skills` | `/find-skills` | 1.0.0 | Searches the open skills.sh ecosystem for an existing skill for a task, vets it (installs, source reputation, GitHub stars) before recommending, and installs it |
+| `trading-system-review` | `/trading-system-review` | 1.0.1 | Fresh-eyes senior-trader review of an existing trading system: fresh backtest, deflated Sharpe / PBO / Monte Carlo stats, today's-market research, gated rubric → offline HTML report with a deploy / incubate / revamp / retire verdict |
+| `skill-scout` | `/skill-scout:skill-scout` | 0.1.0 | Before a substantial task, finds existing agent skills that fit it, security-reviews them, and installs only the ones you approve |
 | `smart-money-concepts` | `/smart-money-concepts` | 1.0.0 | Two-book SMC knowledge base: structure, BOS/CHoCH, inducement, sweeps, order blocks, FVG, premium/discount, with testable algorithmic definitions and where the books disagree |
 
-All nine are **skills**, so you don't strictly need the slash command. Describing the task in plain
-language triggers them too — pasting a YouTube link fires `video-analysis`, saying "summarize this
-book, I don't have time to read it" fires `ebook-lecture-notes`, saying "let's build a habit
-tracker app" fires `system-builder`. The slash command is just the explicit way to ask.
+All eight are **skills**, so you don't strictly need the slash command. Describing the task in
+plain language triggers them too — saying "teach me this codebase" fires `codebase-teacher`,
+"summarize this book, I don't have time to read it" fires `ebook-lecture-notes`, "let's build a
+habit tracker app" fires `system-builder`. The slash command is just the explicit way to ask.
 
 ---
 
@@ -136,86 +119,79 @@ tracker app" fires `system-builder`. The slash command is just the explicit way 
 
 | You want to… | Use |
 |---|---|
-| Understand what's in a video without watching it | `/video-analysis` |
+| Understand an existing codebase well enough to teach it | `/codebase-teacher` |
 | Digest a book or a folder of ebooks without reading them | `/ebook-lecture-notes` |
-| Learn a new area / compare options / decide whether to adopt something | `/rnd` |
-| Research a trading strategy, indicator, broker, or data source | `/trading-rnd` |
-| Improve something that already exists (a service, a pipeline, a strategy) | `/rnd` or `/trading-rnd` — both have an "improve" mode |
+| Learn a new area / compare options / decide whether to adopt something (trading topics included) | `/rnd` |
+| Improve something that already exists (a service, a pipeline, a strategy) | `/rnd` — it has an "improve" mode |
 | Do one big multi-part task faster and cheaper | `/orchestrate` |
 | Build a whole new system from a vague idea | `/system-builder` |
-| Run an authorized web pentest / bug-bounty assessment | `/web-pentest` |
 | Find out if an existing trading system still works, is overfitted, or is outdated | `/trading-system-review` |
-| Find an installable skill for a task before building the capability by hand | `/find-skills` |
-
-**`rnd` vs `trading-rnd`** — they overlap on purpose. `trading-rnd` is the specialised path: it
-loads your trading system's context and grades every finding against it. `rnd` handles everything
-else and steps aside for `trading-rnd` on trading topics when that one is installed.
+| Check for an installable skill before building a capability by hand | `/skill-scout:skill-scout` |
+| Apply or code Smart Money Concepts rules (BOS/CHoCH, order blocks, FVG…) | `/smart-money-concepts` |
 
 **`orchestrate` vs `system-builder`** — `orchestrate` is a *tactic* for one task. `system-builder`
 is a *project workflow* covering the whole arc, and it uses orchestrate's delegate protocol
 internally for its research and coding fan-out. Install both; system-builder falls back to
 general-purpose subagents if orchestrate is missing, but that's the degraded path.
+`codebase-teacher` and `trading-system-review` follow the same plan → delegate → synthesize pattern.
 
 ---
 
 ## User guide
 
-### `/video-analysis` — turn a video into notes
+### `/codebase-teacher` — turn an existing codebase into a teaching handbook
 
-**What it does.** Claude can't watch video. This skill converts one into things Claude *can* read —
-extracted frames plus a transcript — then writes timestamped notes from both.
+**What it does.** Studies a repository you didn't write (or wrote long ago) and produces a
+handbook a senior would use to teach it to a junior: the mental model, architecture and flow
+diagrams, every first-party file explained, and every claim about *why* labelled with its evidence.
+Nothing in the repository changes.
 
 **How to invoke**
 
 ```
-/video-analysis https://www.youtube.com/watch?v=...
-/video-analysis C:\Users\me\Videos\lecture.mp4
+/codebase-teacher
+/codebase-teacher src/billing
+/codebase-teacher --deep --exhaustive src/core/scheduler.py
 ```
 
-Or just paste the link with a question: *"what does this video actually claim about X?"*
+Plain language works too — *"teach me this entire codebase"*, *"explain why it was built this
+way"*, *"create onboarding notes I can teach another junior from"*.
 
-**Supported input**
-
-- Any site yt-dlp supports — YouTube, TikTok, Douyin 抖音, RedNote/Xiaohongshu 小红书, Bilibili
-- Local files: `.mp4`, `.mov`, `.mkv`, `.webm`, `.avi`
+| Argument | Effect |
+|---|---|
+| *(scope)* | A path or subsystem name; empty means the whole repository |
+| `--deep` | Function-by-function depth for the scope |
+| `--exhaustive <path>` | Adds line-by-line volume(s) for that file or directory |
+| `--harder` | Runs analysts and the verifier on the session model instead of Sonnet / Opus |
 
 **What happens**
 
-1. **Fetch** — downloads the video, and its captions if the platform offers them (which skips
-   transcription entirely).
-2. **Probe** — reads duration/resolution/fps and picks an extraction tier:
+1. **Frame** — scope, reader, languages, and only the questions whose answers change the study.
+2. **Inventory** — `scripts/coverage.py init` snapshots the commit, fingerprints every file, lists
+   first-party files, and groups vendored / generated / lockfile / binary / ignored files with the
+   reason they get no line-level analysis.
+3. **Spec** — the session model writes one shared spec (vocabulary, architecture, flows, and
+   disjoint file *slices*) so parallel chapters share one mental model.
+4. **Analyse** — one Sonnet analyst per slice, all in parallel, each writing a chapter.
+5. **Synthesize** — the session model writes the end-to-end flows itself and reconciles the
+   chapters; `coverage.py check` must report every first-party file explained.
+6. **Verify** — an Opus verifier runs the build and tests in a scratch copy (never the repo),
+   samples `path:N` references against the source, fixes the chapters, and writes `VERIFY.md`.
+7. **Build** — `scripts/build_handbook.py` renders a self-contained `handbook.html` (light and dark),
+   optionally split into volumes (`--split`) and a PDF (`--pdf`, via headless Chrome/Edge or
+   weasyprint).
 
-   | Tier | Duration | Frame strategy |
-   |---|---|---|
-   | short | < 4 min | a frame every 2–3 s, read individually |
-   | medium | 4–20 min | scene-change keyframes + 1 frame/10 s, read as 3×3 grids |
-   | long | > 20 min | scene-change keyframes only + 1 frame/30 s, read as 3×3 grids |
+**Evidence rules.** Every technical claim carries a `path:N` reference against the snapshot
+commit. Every claim about intent is `[Confirmed]` (a doc, comment, test, or commit message says
+so), `[Inferred]` (with the evidence), or `[Unknown]` (with what was searched). Secrets are named,
+never quoted, and the check scans the chapters and the built HTML for credential shapes.
 
-   The tier is what controls token cost. Ask for finer detail on a specific range and it will
-   re-extract just that range.
-3. **Extract** — frames *and* transcript, always. On-screen text, charts, demos, and UI
-   walkthroughs routinely carry information the audio never mentions.
-4. **Analyse** — reads the transcript in full, views the frames, and explicitly reconciles the two:
-   what was said but not shown, and shown but not said.
-5. **Write** — saves a `.md` notes file named after the video and hands you the file.
+**Read-only, enforced.** Anything that writes — installs, builds, tests, formatters — runs in
+`<workdir>/verify/repo`, and `coverage.py check` fails if any repo file or `HEAD` changed since init.
 
-**What you get.** A notes file with: summary, key takeaways, a timestamped breakdown in `[mm:ss]`,
-a visual-only section, extracted knowledge, notable quotes, caveats, and a **Prompt-Ready
-Distillation** — a self-contained block with no references to "the video", so you can paste it
-straight into a system prompt.
-
-**Notes are written in the video's primary language.** A Chinese video produces Chinese notes
-(中文视频输出中文笔记) unless you ask otherwise.
-
-**Useful things to ask for**
-
-- *"Zoom in on 12:00–15:00, there's a chart there"* → re-extracts that range densely
-- *"Keep the transcript"* → saved next to the notes (it asks before deleting the scratch dir anyway)
-- Multiple URLs at once → one notes file each, processed sequentially, plus a comparison note if
-  you ask for synthesis
-
-**Requirements.** Needs `ffmpeg` and `yt-dlp` installed — see
-[setup & troubleshooting](#video-analysis-setup--troubleshooting) below.
+**Requirements.** Python 3.11+ (stdlib only). Optional: Chrome, Edge, Chromium, or weasyprint for
+the PDF. Fonts load from Google Fonts when online and fall back to system fonts offline. Install
+`orchestrate` too — the skill follows its delegate protocol.
 
 ---
 
@@ -346,76 +322,6 @@ usefully scoped version rather than silently under-delivering.
 
 ---
 
-### `/trading-rnd` — research for the US-stocks auto trading system
-
-**What it does.** Same pipeline as `/rnd`, but every finding is graded against *your* trading
-system, and it ends by answering **"should I build this, and if so, how?"**
-
-#### ⚙️ Set this up first
-
-Fill in `plugins/trading-rnd/skills/trading-rnd/references/my-system.md`. It's a placeholder file,
-and anything left unfilled gets treated as unknown and flagged as an assumption in every report.
-It covers:
-
-| Section | What goes in it |
-|---|---|
-| Broker & execution | Broker + API, order types, trading frequency, account constraints (PDT, cash vs margin) |
-| Data | Sources, granularity, universe, and **what you don't have** (options chains, fundamentals, level-2) |
-| Validation process | How you validate before going live; whether paper trading is available |
-| Current features & strategies | What the system does today, what's live, short rule summaries per strategy |
-| Preferences & constraints | Risk appetite, position sizing, monthly budget for data/tools, things already ruled out |
-
-Code-level details are deliberately excluded — Claude Code discovers those from the real codebase.
-This file only holds the domain facts research needs. A 5-minute edit here sharpens every future
-report.
-
-**How to invoke**
-
-```
-/trading-rnd mean reversion on US equities
-/trading-rnd real-time risk monitoring dashboard
-/trading-rnd improve my momentum strategy, drawdowns are too deep
-```
-
-**What happens**
-
-1. **Load context** from `my-system.md`.
-2. **Classify** the topic, because each type needs different sub-questions and a different report
-   template:
-   - **Strategy** — a trading approach (mean reversion, pairs trading, options wheel) → Template A
-   - **Feature** — a system capability (risk dashboard, execution improvement, alerting) → Template B
-   - **General tech** — self-learning not tied to the system → Template B minus trading sections
-   - **Improve** — upgrading something that already exists → Template C
-3. **Gather** across web, GitHub, r/algotrading, r/quant, HN, Quantitative Finance Stack Exchange,
-   and official broker/vendor docs. Recency discipline applies hard here — broker offerings and
-   data pricing change fast, so key sources get date-stamped.
-4. **Evaluate fit** against your system on four axes: data you'd need vs data you have, execution
-   model compatibility, implementation effort (concept-level sizing only), and risk.
-5. **Report** using the matching template.
-
-**What you get.** `rnd-<topic-slug>-<YYYY-MM-DD>.md` plus a chat verdict, ending in a starter plan
-— first thing to build, first backtest to run, a measurable success criterion — and a Claude Code
-handoff prompt.
-
-**Improve mode specifics.** It cannot see your codebase. If the actual rules (entry/exit logic,
-universe, holding period, sizing) aren't in your prompt, an uploaded file, a past report, or
-`my-system.md`, it asks you to paste a short summary rather than guessing from the strategy's name.
-It asks for symptoms in the same batch — backtest-vs-live gap, deep drawdowns, whipsaws, cost drag,
-missed fills — then maps symptoms to candidate causes and researches those specifically. Each
-improvement candidate comes with a hypothesis, an exact comparison test, and a **kill criterion**.
-
-**Built-in skepticism.** Every strategy report must honestly answer *"why would this edge still
-exist?"* Public strategies are mostly decayed alpha — if it's free on GitHub with thousands of
-stars, the easy edge is assumed gone. Found strategies are treated as learning material and
-building blocks, not plug-and-play systems.
-
-**Boundaries.** Research and feasibility analysis, **not financial advice**. Framing is always
-"here is what to test", never "this will be profitable". Any simulations it runs use synthetic data
-to illustrate mechanics (how costs erode a win-rate profile, how sizing changes drawdown shape) —
-they are explicitly not backtests, and real validation stays in your own process.
-
----
-
 ### `/orchestrate` — plan expensive, execute cheap
 
 **What it does.** Keeps the costly reasoning on your session's strong model (Opus/Fable) and pushes
@@ -501,106 +407,6 @@ that's the fallback, not the intent.
 
 ---
 
-### `/web-pentest` — run an authorized, phase-gated web pentest
-
-**What it does.** Orchestrates a disciplined penetration test against an **authorized**
-bug-bounty or VDP target: scope/rules-of-engagement verification, recon, surface mapping,
-per-vulnerability-class testing driven through Burp Suite, PoC confirmation, and chaining —
-producing a structured findings folder. It's a **methodology orchestrator, not an exploit
-library** — it decides what to test and drives the tooling, but ships no ready-to-fire
-payloads; the class checklists teach what to look for and how to confirm it, not canned
-strings to paste.
-
-**How to invoke**
-
-```
-Please help me perform the web pentest to [platform] [program] [url]
-```
-
-For example:
-
-```
-Please help me perform the web pentest to HackerOne Acme Corp https://app.acme.example.com
-```
-
-`[platform]` is HackerOne, Bugcrowd, Intigriti, YesWeHack, or self-hosted/`security.txt`. If
-any of the three fields is missing or ambiguous, Phase 0 asks before doing anything else
-rather than guessing — including never guessing the platform from the URL's TLD or branding.
-
-**Authorized testing only.** Phase 0 is a hard stop, not a formality: it pulls the *live*
-program page, confirms the given URL is actually covered by an in-scope asset — not just
-"the program in general" — and confirms the user is an enrolled participant who has accepted
-the current RoE. **If scope cannot be confirmed with high confidence, it stops and tells the
-user instead of proceeding on a best guess.** Ambiguous wildcard matches, lookalike domains,
-unclear redirects, a program page it can't read, or an unstated registration status are all
-hard-stop conditions — not judgment calls it resolves by picking the more permissive reading.
-
-**What happens**
-
-1. **Phase 0 — Authorization & scope gate (hard stop).** Parses the trigger, fetches the live
-   program page, confirms coverage, and writes `scope.md` — the single source of truth every
-   later phase and every guardrail check reads from. Chooses the autonomy mode here too.
-2. **Phase 1 — Recon & enumeration.** Passive first (crt.sh, Wayback/gau, subfinder passive
-   sources — no target contact), then active/light (httpx, katana, nuclei) once the RoE
-   confirms automated scanning is permitted.
-3. **Phase 2 — Surface mapping.** Connects Burp and browses the app to map auth flows, roles,
-   data objects, and endpoints into `surface-map.md`. Sets up multi-account access here, since
-   access-control and business-logic testing need at least two accounts.
-4. **Phase 3 — Per-class testing.** Works eight vulnerability classes — access control,
-   auth/session, input handling, SSRF, business logic, misconfig/disclosure, API issues,
-   client-side — ordered by likely payoff from the surface map, not a fixed order.
-5. **Phase 4 — Confirmation & PoC.** Reproduces each promising finding, captures the exact
-   request/response and repro steps, scores it (CVSS v3.1), and writes it into `findings.md`.
-   Unreproducible findings are dropped or marked `candidate`.
-6. **Phase 5 — Chaining.** Combines lower-severity primitives into higher-impact chains (e.g.
-   open redirect + token leak → account takeover), documented as their own `findings.md`
-   entries with the component primitive IDs linked.
-
-**What you get.** `engagements/<program>-<date>/` — `scope.md`, `recon/`, `surface-map.md`,
-`findings.md`, and `poc/` (screenshots and saved request/response evidence). Resuming in a
-directory that already has an `engagements/` folder picks up from whichever phase is done,
-after confirming with you — it never silently restarts Phase 0 unless scope data is missing
-or looks stale.
-
-**Autonomy modes.** Chosen once at Phase 0, recorded in `scope.md`, and re-checked before
-every intrusive action for the rest of the engagement:
-
-| Mode | Behavior |
-|---|---|
-| **Gated** (default) | Passive recon runs freely. Every intrusive action — fuzzing, auth attacks, SSRF probes, injection payloads, any state-changing request — is proposed and waits for your explicit approval, one action (or one tight batch) at a time. |
-| **Semi-auto** | Recon and non-destructive active tests run automatically within RoE rate limits. Writes, deletes, or anything touching another account's data still stops and waits for confirmation. |
-| **Full-auto** | Intrusive tests fire automatically within RoE rate limits; execution stops only for destructive actions or cross-account data. Requires pre-approving in-scope hosts in Burp ("Always Allow") beforehand, or the agent loop stalls on Burp's own per-host prompts. |
-
-Some actions are **always forbidden regardless of mode**: DoS/stress testing, touching other
-real users' data, social engineering, bulk data exfiltration, destructive writes on
-production, out-of-scope assets, and exceeding stated rate limits. No RoE wording and no
-in-the-moment approval overrides these.
-
-**Tooling.** Drives **Burp Suite Community** through the official PortSwigger MCP server over
-SSE (`claude mcp add --transport sse burp http://127.0.0.1:9876/sse`) — reading proxy
-history, replaying/modifying requests via Repeater, and handing requests to Intruder for
-fuzzing. 24 of the extension's 27 MCP tools are free on Community; the 3 Pro-gated ones
-(active scanner, Collaborator) are substituted by the agent reasoning over individual
-Repeater round-trips instead. Recon runs on **native Windows PowerShell — no WSL** — using
-Windows-native binaries for `subfinder`/`httpx`/`katana`/`nuclei`/`ffuf`/`gau`/`amass`/
-`gowitness`; a zero-dependency `passive-recon.ps1` fallback covers crt.sh/Wayback/DNS when
-those aren't installed, and `setup-check.ps1` reports tool readiness plus whether the Burp
-MCP listener is reachable. If Burp MCP isn't connected, the skill degrades to **advisory
-mode** — it tells you exactly what to send or click and interprets what you paste back,
-rather than silently waiting or retrying as if nothing changed.
-
-**Boundaries.** Ships no exploit payloads or canned attack strings — the checklists teach
-methodology, not ready-to-fire code. Not for targets without a named, verified program, and
-never proceeds against a target just because it looks vulnerable.
-
-**Companion `report-submission` skill.** The same plugin also bundles a formatter that turns
-`findings.md` entries into platform-ready report submissions — *"generate a HackerOne report
-for WP-004"* is the kind of phrasing that triggers it. It is **formatter-only**: it never
-submits on your behalf — you review the finished report and submit it yourself. Output covers
-HackerOne, Bugcrowd, Intigriti, and YesWeHack.
-
----
-
 ### `/trading-system-review` — a senior trader's verdict on an existing system
 
 **What it does.** Rates one of your trading-system repos with fresh eyes, the way a prop-desk head
@@ -662,148 +468,41 @@ read-only, apart from files its own backtest writes, and those are listed in `ba
 
 ---
 
-### `/find-skills` — find a skill for anything
+### `/skill-scout` — check for an existing skill before a big task
 
-**What it does.** Before building a capability by hand, checks the open agent-skills ecosystem
-([skills.sh](https://skills.sh/)) for an existing, battle-tested skill and installs it.
+**What it does.** At the start of a substantial task in a specialized domain, pulls keywords from
+your request, checks the skills you already have, then searches skills.sh, GitHub, well-known
+collections, and your added marketplaces. Each candidate gets a security review (network calls,
+credential reads, elevated shells, hidden instructions…) before you see a shortlist of up to
+five. Only the skills you pick are installed, then it carries on with your original request.
+
+**How to invoke.** It fires on its own for tasks like *"build an integration for Shopify"*, or
+explicitly with `/skill-scout:skill-scout <task>`. Say *"skip skill search"* to bypass it.
+
+**Requirements.** Node.js 18+ (no npm dependencies). Optional: a logged-in `gh` CLI for GitHub code
+search. Full details, including how to disable it: [`plugins/skill-scout/README.md`](plugins/skill-scout/README.md).
+
+---
+
+### `/smart-money-concepts` — a two-book SMC knowledge base
+
+**What it does.** A reference skill built from two Smart Money Concepts ebooks (Frank Miller,
+2024, and the anonymous *E-book Smart Money SMC*): market structure, BOS/CHoCH, inducement,
+liquidity sweeps, order blocks, FVG/imbalance, POI, premium/discount, entry models, and risk
+management. It ships testable algorithmic definitions for coding indicators, screeners, and
+backtests, plus a book comparison of where the two authors disagree.
 
 **How to invoke**
 
 ```
-/find-skills changelog
-/find-skills react performance
+/smart-money-concepts
+/smart-money-concepts order blocks
+/smart-money-concepts fm-ch04
 ```
 
-Plain language works too — *"is there a skill for PR reviews?"*, *"I wish I had help setting up
-docker"*, *"can you do X?"* where X smells like a solved problem.
-
-**What happens**
-
-1. **Leaderboard first.** Checks [skills.sh](https://skills.sh/) for a well-known skill in the
-   domain before searching — `vercel-labs`, `anthropics`, and `microsoft` sources are the
-   trusted ones.
-2. **Search.** `npx skills find <query>` with specific keywords, trying alternative terms when
-   a query comes back empty.
-3. **Vet before recommending.** Install count (1K+ preferred, under 100 treated with
-   suspicion), source reputation, and GitHub stars on the source repo. Never recommends off
-   search results alone.
-4. **Present or install.** Shortlist with what each skill does, its install count, source, and
-   the exact `npx skills add <owner/repo@skill> -g -y` command; installs on request. When
-   nothing exists, it says so and offers to do the task directly — or scaffold your own skill
-   with `npx skills init`.
-
-**Requirements.** Node/npm — everything runs through `npx skills`.
-
----
-
-## video-analysis setup & troubleshooting
-
-The scripts check for their own dependencies and print exact install commands on failure. They also
-ask before installing anything on your machine.
-
-| Tool | Required for | Install |
-|---|---|---|
-| `ffmpeg` / `ffprobe` | always | `winget install Gyan.FFmpeg` · `brew install ffmpeg` · `apt install ffmpeg` |
-| `yt-dlp` | URLs only | `winget install yt-dlp.yt-dlp` · `pipx install yt-dlp` |
-| `faster-whisper` | videos without captions | `pip install faster-whisper` — **`pip`, not `pipx`** (see [below](#video-analysis-changes-from-upstream)) |
-
-Alternatives to `faster-whisper`: `openai-whisper`, `whisper.cpp` (`whisper-cli`), or
-`mlx-whisper` on Apple Silicon. Whichever is installed gets used.
-
-Transcription is skipped entirely when the platform provides captions, so `ffmpeg` + `yt-dlp` alone
-covers a lot of YouTube.
-
-### Environment variables
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `WHISPER_MODEL` | `small` | Model size. `base` is 4–5× faster; `medium` when accuracy suffers. |
-| `WHISPER_LANG` | auto-detect | Force a language, e.g. `zh`, when intro music causes misdetection. |
-| `WHISPER_CPP_MODEL` | `~/.cache/whisper.cpp/ggml-small.bin` | ggml model path for the whisper.cpp route. |
-
-### When a download fails
-
-**Douyin and RedNote links often fail on the first try — this is expected, not a dead end.**
-`references/sources.md` holds the per-platform fallback ladder: cookies, share-link expansion, and
-finally manual download → hand it the local file instead. The skill reads that file before telling
-you something can't be done, and reports the specific failing step and exact error rather than
-silently degrading to guessing content from the title.
-
-### Running the scripts by hand
-
-```bash
-bash scripts/fetch_video.sh "<url-or-local-path>" <workdir>
-bash scripts/probe.sh <video-file>
-bash scripts/extract_frames.sh <video-file> <workdir>/frames <short|medium|long>
-bash scripts/extract_frames.sh <video-file> <outdir> zoom <start-s> <end-s>
-bash scripts/get_transcript.sh <video-file> <workdir>
-```
-
-Frames are timestamp-named (`t0042.5.jpg` = 42.5 s). Medium/long tiers also produce montage grids
-(`grid_001.jpg`) plus a `grid_index.txt` mapping each cell back to its timestamp.
-
----
-
-## video-analysis changes from upstream
-
-Four bugs, each reproduced and verified — the first three against a synthetic 300s clip with hard
-cuts and a real 50-minute Douyin video, the fourth against a luminance-ramp clip whose brightness
-encodes its own timestamp, so a frame's true time can be measured rather than eyeballed.
-
-### v1.1.0
-
-1. **Scene detection failed on Windows.** `extract_frames.sh` passed a path to
-   `metadata=print:file=` *inside* the ffmpeg filtergraph, where `:` is an option separator and
-   MSYS/Git-Bash does not rewrite `/c/Users/...` to `C:/Users/...`. Result: zero keyframes and
-   `Error initializing filters`. Now uses `showinfo`, which reports `pts_time` on stderr and
-   needs no path.
-
-2. **Montage grids were scrambled on every platform.** `make_grids` sorted with
-   `sort -t t -k2 -g`, which splits the *entire path* on the letter `t`. Any `t` in a parent
-   directory (`/tmp/...`, `.../scratchpad/...`) shifted the sort key and silently degraded the
-   order to lexicographic: `0, 10, 100, 110, ..., 190, 20, 200, ...`. The grid index still looked
-   plausible, so the corruption was easy to miss. Now sorts numerically on the basename.
-
-3. **`faster-whisper` was never detected.** The PyPI package ships **no console script**
-   (verified on 1.2.1 — its `entry_points` list is empty), so `command -v faster-whisper` never
-   matched and the script reported "no transcription tool found" while a working library sat
-   installed. This is also why the old hint `pipx install faster-whisper` was wrong: pipx installs
-   console scripts and this package has none. A new branch drives the library through Python,
-   with `WHISPER_MODEL` / `WHISPER_LANG` overrides.
-
-Also fixed: scene keyframes rounding to 0.1s could collide on rapid cuts and silently overwrite
-each other (310 frames in, 286 out). Collisions now get a numeric suffix.
-
-### v1.1.1
-
-4. **Every interval frame carried the wrong timestamp.** `extract_interval` sampled with
-   `-vf fps=1/N`, but the `fps` filter *synthesises* output timestamps in a 1/N timebase — so
-   `showinfo` reports the bucket's nominal time regardless of where in the bucket the selected
-   frame actually came from. Measured on a 600s 30fps ramp at the long tier: **all 20 frames were
-   labelled 12–17s early**, a consistent bias of about half a 30s bucket. `grid_index.txt`
-   inherited the error, and nothing about the output looked wrong. Notes built on this cite
-   timestamps that don't match the video.
-
-   Now selects on absolute `t` and reads the label back off the emitted frame
-   (`select='lt(mod(t,N),win)',showinfo`), which cannot drift. Same clip after the fix: worst
-   error 2.9s, within the ±2.5s precision of the measurement itself.
-
-   **The window width is the subtle part.** It must be at least one *full* frame duration. A
-   half-frame window looks correct at exactly 30fps — 30s buckets land on a frame boundary, so
-   `mod()` hits zero every time — but silently drops buckets at 29.97fps (`30000/1001`), where
-   frame times drift against the bucket grid. At `0.5/fps` a 600s 29.97fps clip yielded **11 of
-   20** long-tier frames; at `1.02/fps` it yields 20. Verified at 30, 29.97, 25, 23.976, and
-   60fps: 20/20 frames each, no duplicates, worst label error 2.9s.
-
-   Zoom mode was checked and deliberately left on `fps=1` — its `-ss` seek is accurate and at
-   interval 1 the bucket is one frame wide, so no drift accumulates.
-
-Also added: a Douyin fallback route via the unsigned `iesdouyin.com` share page, for when yt-dlp
-fails with `Fresh cookies (not necessarily logged in) are needed` because the web detail JSON now
-demands a request signature yt-dlp cannot produce. On Windows, cookie extraction fails
-independently — Chrome's DB is locked while Chrome runs, and Chrome/Edge v20+ app-bound encryption
-defeats DPAPI — so the cookie ladder is not a way out. **The network route is documented but
-untested here**; only its URL-extraction snippet was verified, against a synthetic page.
+No argument uses the core frameworks; a topic, rule name, or chapter id (`fm-ch04`, `se-ch09`)
+pulls the matching chapter. It also fires when you analyse a chart or write trading code with SMC
+terms. Study material, not financial advice.
 
 ---
 
@@ -889,9 +588,12 @@ plugins/<name>/
   .claude-plugin/plugin.json        # name, description, version, author
   skills/<name>/
     SKILL.md                        # the skill itself (frontmatter: name + description)
-    references/                     # templates and context files, read on demand
-    scripts/                        # executable helpers (video-analysis, ebook-lecture-notes, trading-system-review)
+    references/                     # templates and context, read on demand (codebase-teacher: reference/)
+    scripts/                        # executable helpers (codebase-teacher, ebook-lecture-notes,
+                                    #   skill-scout, trading-system-review)
     assets/                         # chart template (ebook-lecture-notes only)
+  theme/tokens.css                  # handbook theme (codebase-teacher only)
+docs/superpowers/                   # design spec + implementation plan for trading-system-review
 ```
 
 **Adding a plugin:** create `plugins/<name>/` with the two files above, add an entry to
@@ -901,27 +603,29 @@ plugins/<name>/
 The `description` in `SKILL.md`'s frontmatter is what decides whether Claude reaches for the skill
 unprompted, so it should name concrete trigger phrases rather than describe the skill abstractly.
 Keep `plugin.json` and `marketplace.json` descriptions in sync, and bump `version` in
-`plugin.json` when you change behaviour.
+`plugin.json` when you change behaviour — installed copies only update when the version changes.
 
 ---
 
 ## Attribution
 
-`video-analysis`, `system-builder`, and `ebook-lecture-notes` originated as third-party `.skill`
-archives; none recorded an author or a license. The `video-analysis` fixes above are the only
-modifications to that skill; `ebook-lecture-notes` was likewise patched at import — see
+`system-builder` and `ebook-lecture-notes` originated as third-party `.skill` archives; neither
+recorded an author or a license. `ebook-lecture-notes` was patched at import — see
 [ebook-lecture-notes changes from upstream](#ebook-lecture-notes-changes-from-upstream);
-`system-builder` is unmodified. `orchestrate`, `rnd`, `trading-rnd`, `web-pentest`, and `trading-system-review` are personal.
-`find-skills` comes from the open skills ecosystem distributed alongside the `skills` CLI
-([skills.sh](https://skills.sh/)) and is included essentially unmodified.
+`system-builder` is unmodified. `orchestrate`, `rnd`, `trading-system-review`, and
+`smart-money-concepts` are personal. `skill-scout` and `codebase-teacher` come from Snapdec Sdn Bhd;
+`codebase-teacher` was adapted on import to run standalone (bundled theme, Windows fixes).
 
-No license is asserted, because the upstream skills shipped without one. Confirm the original
-terms before making this repository public or redistributing it.
+`smart-money-concepts` is study notes on two copyrighted ebooks.
+
+No license is asserted, because the upstream skills shipped without one. This repository is
+public; confirm the original terms of the third-party skills and the source books before
+redistributing them.
 
 ---
 
 ## Line endings
 
 `.gitattributes` forces LF. Git for Windows defaults to `core.autocrlf=true`, which would rewrite
-the shell scripts to CRLF on clone; bash then fails with `$'\r': command not found`, which is
+scripts to CRLF on clone; a shell script then fails with `$'\r': command not found`, which is
 awkward to diagnose because the files look correct in an editor.

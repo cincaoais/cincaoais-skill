@@ -7,21 +7,21 @@
   },
   "plugins": [
     {
+      "name": "codebase-teacher",
+      "description": "Reverse-engineers an existing codebase read-only and writes a teaching handbook: architecture and flow diagrams, file-by-file explanations, Confirmed/Inferred/Unknown rationale labels, a file-coverage ledger checked by script, and build/test verification, built into a self-contained HTML (optional PDF). Plans on the session model, analyses subsystems on parallel Sonnet agents.",
+      "author": {
+        "name": "Snapdec Sdn Bhd"
+      },
+      "source": "./plugins/codebase-teacher",
+      "category": "development"
+    },
+    {
       "name": "ebook-lecture-notes",
-      "description": "Turn ebooks into layered study notes written in the voice of a senior lecturer — named mental models, data-backed charts, a critical layer that argues against the book, and a self-test. Handles single books or a whole directory in batch.",
+      "description": "Turn ebooks (PDF, EPUB, DOCX, MOBI, and more) into layered study notes written in the voice of a senior lecturer — named mental models, data-backed charts, a critical layer that argues against the book, and a self-test. Handles single books or a whole directory in batch.",
       "author": {
         "name": "Tang Cong Han"
       },
       "source": "./plugins/ebook-lecture-notes",
-      "category": "productivity"
-    },
-    {
-      "name": "find-skills",
-      "description": "Discovers and installs agent skills from the open skills.sh ecosystem — checks the leaderboard, searches the skills CLI, vets quality (install count, source reputation, GitHub stars) before recommending, and installs the right skill for a task.",
-      "author": {
-        "name": "Tang Cong Han"
-      },
-      "source": "./plugins/find-skills",
       "category": "productivity"
     },
     {
@@ -52,6 +52,15 @@
       "category": "productivity"
     },
     {
+      "name": "smart-money-concepts",
+      "description": "Knowledge base from two Smart Money Concepts (SMC) ebooks (Frank Miller 2024, and the anonymous E-book Smart Money SMC): market structure, BOS/CHoCH, inducement, liquidity sweeps, order blocks, FVG, POI, premium/discount, with testable algorithmic definitions and a book-comparison of where they disagree.",
+      "author": {
+        "name": "Tang Cong Han"
+      },
+      "source": "./plugins/smart-money-concepts",
+      "category": "productivity"
+    },
+    {
       "name": "system-builder",
       "description": "Phase-gated workflow for building a new system end to end: kickoff interview, multi-agent R&D, detailed planning, subagent code execution, then review and demo. Pairs with the orchestrate plugin when installed.",
       "author": {
@@ -62,47 +71,11 @@
     },
     {
       "name": "trading-system-review",
-      "description": "Fresh-eyes senior-trader review of an existing trading system: fresh backtest, deflated Sharpe / PBO / Monte Carlo / regime stats, today's-market web research, a 10-dimension gated rubric, and an offline HTML report with a deploy / incubate / revamp / retire verdict.",
+      "description": "Fresh-eyes senior-trader review of an existing algorithmic trading system: re-runs the backtest, computes deflated Sharpe / PBO / Monte Carlo / regime stats with a bundled script, researches today's market and new techniques on the web (CloakBrowser fallback), scores a 10-dimension rubric with hard gates, and renders an offline HTML report with charts and a deploy / incubate / revamp / retire verdict. Delegates through the orchestrate skill.",
       "author": {
         "name": "Tang Cong Han"
       },
       "source": "./plugins/trading-system-review",
-      "category": "productivity"
-    },
-    {
-      "name": "trading-rnd",
-      "description": "Deep R&D investigation pipeline for US-stocks auto-trading topics — strategies, indicators, market data, broker capabilities, risk management, and backtesting — producing a structured report with a feasibility assessment.",
-      "author": {
-        "name": "Tang Cong Han"
-      },
-      "source": "./plugins/trading-rnd",
-      "category": "productivity"
-    },
-    {
-      "name": "video-analysis",
-      "description": "Watch, analyze, and take structured knowledge notes from videos. Handles YouTube, TikTok, Douyin, RedNote/Xiaohongshu, Bilibili, any yt-dlp-supported site, or a local file, by decomposing the video into frames plus a transcript and writing timestamped notes.",
-      "author": {
-        "name": "Tang Cong Han"
-      },
-      "source": "./plugins/video-analysis",
-      "category": "productivity"
-    },
-    {
-      "name": "web-pentest",
-      "description": "Phase-gated authorized web pentest workflow for bug-bounty/VDP targets: Phase 0 scope+RoE gate (hard-stops if out of scope), recon, surface mapping, 8-class checklist testing via Burp Suite MCP, PoC confirmation, and chaining into a structured findings folder. Methodology orchestration, not exploit payloads. Bundles a companion report-submission skill that turns findings into platform-ready report submissions (HackerOne, Bugcrowd, Intigriti, YesWeHack).",
-      "author": {
-        "name": "Tang Cong Han"
-      },
-      "source": "./plugins/web-pentest",
-      "category": "security"
-    },
-    {
-      "name": "smart-money-concepts",
-      "description": "Knowledge base from two Smart Money Concepts (SMC) ebooks (Frank Miller 2024, and the anonymous E-book Smart Money SMC): market structure, BOS/CHoCH, inducement, liquidity sweeps, order blocks, FVG, POI, premium/discount, with testable algorithmic definitions and a book-comparison of where they disagree.",
-      "author": {
-        "name": "Tang Cong Han"
-      },
-      "source": "./plugins/smart-money-concepts",
       "category": "productivity"
     }
   ]

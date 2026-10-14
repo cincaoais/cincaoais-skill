@@ -1,6 +1,6 @@
 ---
 name: rnd
-description: General-purpose R&D investigation for any domain — software systems, tools, frameworks, techniques, product features, infrastructure, workflows, trading, or any "research it first, then develop it" topic. Use whenever the user types /R&D or /rnd followed by a topic, or asks to research, investigate, explore, or deep-dive something new. Note; for topics about the user's US-stocks auto trading system (strategies, indicators, trading features), the trading-rnd skill is the more specialized choice — prefer it when it is available, and handle those topics here otherwise.
+description: General-purpose R&D investigation for any domain — software systems, tools, frameworks, techniques, product features, infrastructure, workflows, trading, or any "research it first, then develop it" topic. Use whenever the user types /R&D or /rnd followed by a topic, or asks to research, investigate, explore, or deep-dive something new.
 ---
 
 # R&D Explorer

@@ -6,7 +6,7 @@ description: >
   system", "is my system still working / still in line with the market", "is it outdated", "is it
   overfitted", "should I revamp or retire it", "senior trader review", "/trading-system-review <repo>".
   Any market (gold/XAUUSD, futures, FX, crypto, stocks). Not for researching a new strategy idea
-  (trading-rnd) or building a new system (system-builder).
+  (rnd) or building a new system (system-builder).
 model: best
 argument-hint: "<path-to-trading-repo>"
 ---
