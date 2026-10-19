@@ -46,6 +46,8 @@ Read the sample. This takes ten seconds and prevents the worst outcome in this w
 pdftoppm -jpeg -r 150 -f 10 -l 10 book.pdf /tmp/page
 ```
 
+150 dpi is enough for prose and contents pages. Dense tables and charts need the 300 dpi crop described under *Evidence that isn't text at all* below.
+
 ---
 
 ## 3. Failure modes that produce silent garbage
@@ -62,7 +64,7 @@ These matter more than the happy path, because each one produces output that *lo
 
 **EPUB extracted via stdlib zipfile** loses chapter boundaries entirely — you get one continuous blob. If chapter detection fails on an EPUB, check whether `ebooklib` was actually available before concluding the book has no chapters.
 
-**Evidence that isn't text at all.** Tables, charts, and worked examples are often embedded as images, and plain-text extraction drops them without a trace. The tell is dangling prose: *"the table below shows…"* followed by nothing, or figure captions (`图24.3`, `Figure 7`) with no figure content. This is the inverse of every other failure here — nothing is corrupted, the evidence just isn't in the text layer. When the missing content is load-bearing, render that page and read it visually (`pdftoppm -jpeg -r 150 -f <page> -l <page>`, or PyMuPDF if poppler is absent) rather than silently under-reporting the book's evidence. If it isn't worth recovering, say in Layer 6 that it exists and wasn't read.
+**Evidence that isn't text at all.** Tables, charts, and worked examples are often embedded as images, and plain-text extraction drops them without a trace. The tell is dangling prose: *"the table below shows…"* followed by nothing, or figure captions (`图24.3`, `Figure 7`) with no figure content. This is the inverse of every other failure here — nothing is corrupted, the evidence just isn't in the text layer. When the missing content is load-bearing, render that page and read it visually (`pdftoppm -jpeg -r 150 -f <page> -l <page>`, or PyMuPDF if poppler is absent) rather than silently under-reporting the book's evidence. When it's a dense table or chart whose values go into the notes, render the page as PNG at 300 dpi instead (`pdftoppm -png -r 300 -f <page> -l <page>`, or PyMuPDF), crop to the table or chart (PIL `Image.crop`, PyMuPDF `clip=`, or pdftoppm's `-x -y -W -H`), and read the crop, zooming further into any cell you're unsure of, before transcribing a figure into the evidence layer. If it isn't worth recovering, say in Layer 6 that it exists and wasn't read.
 
 **Rule: sample the output every time.** A confident pipeline over garbage input produces confident garbage output, and nothing downstream will catch it.
 

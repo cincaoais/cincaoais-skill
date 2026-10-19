@@ -1,6 +1,6 @@
 # Plan Template — docs/02-PLAN.md
 
-Use this exact structure. The plan must be executable by subagents who have read nothing else except the brief and this file.
+Use this exact structure. The plan must be executable by subagents who have read nothing else except the brief and this file. Match the length of each section to what Phase 3 needs: cover the substance, but do not pad with filler sections, redundant summaries, or boilerplate. If a section doesn't apply, write "None" in one line.
 
 # Implementation Plan: [Project Name]
 
@@ -23,6 +23,9 @@ For each slice inside it:
   - Test gate: the specific tests that must pass before this slice is done
   - Depends on: [slices]
   - Parallelizable with: [slices] (no shared files)
+
+## UI direction
+One block that Phase 3 copies verbatim into every frontend slice prompt: the brief's visual direction (brand colors and fonts, reference products) plus concrete patterns to avoid, e.g. "Do not use a cream or off-white background, italic accent words in headlines, numbered '01/02/03' section labels, monospace labels, or pill-shaped buttons."
 
 ## File / module layout
 The intended directory tree so subagents don't invent conflicting structures.

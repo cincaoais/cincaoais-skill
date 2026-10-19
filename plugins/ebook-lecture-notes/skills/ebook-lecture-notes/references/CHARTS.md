@@ -48,7 +48,7 @@ In `template.html` these map to the CSS classes `tag-book`, `tag-mine`, `tag-sin
 
 Use `assets/template.html`. One file, no build step — everything except Chart.js (cdnjs) and fonts (Google Fonts) is inline, so it needs internet the first time it's opened; charts render blank offline.
 
-The template supplies a ledger-paper palette — pale cool ground, tabular monospace figures, brass and oxide accents. It's built for long-form reading rather than dashboard scanning. Replace the palette if the book's subject suggests something better; keep the structure.
+The template supplies a ledger-paper palette — pale cool ground, tabular monospace figures, brass and oxide accents. It's built for long-form reading rather than dashboard scanning. Replace the palette if the book's subject suggests something better, but change colors only: keep the structure, fonts and label styles. Don't move the ground to a cream, beige or parchment tone, and don't add italic accent words to headings, numbered "01/02/03" section labels, or pill-shaped tags. After swapping, check which background the result actually uses and adjust.
 
 **Structural rules:**
 - One chart per section, with its explanation attached — never a gallery of charts followed by a wall of text

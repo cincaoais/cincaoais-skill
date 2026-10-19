@@ -116,6 +116,11 @@ when the system genuinely has nothing to say for one; say so in a line):
   runtime behaviour (decorators, DI, middleware order, ORM lazy loading,
   reflection, codegen) where they first matter; explain common syntax
   once, never again; no "simply", "just", "obviously".
+- **Length**: match each chapter and entry to what the system needs:
+  cover the substance, but do not pad with filler sections, redundant
+  summaries, or boilerplate. The subsystem Summary and "You should now
+  be able to explain" blocks stay, kept tight. A required chapter with
+  little to say gets a short paragraph.
 
 ## Evidence rules
 

@@ -1,7 +1,7 @@
 {
   "name": "codebase-teacher",
   "description": "Reverse-engineers an existing codebase read-only and writes a teaching handbook: architecture and flow diagrams, file-by-file explanations, Confirmed/Inferred/Unknown rationale labels, a file-coverage ledger checked by script, and build/test verification, built into a self-contained HTML (optional PDF). Plans on the session model, analyses subsystems on parallel Sonnet agents.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "Snapdec Sdn Bhd"
   }

@@ -7,7 +7,7 @@ Read this before writing. The workflow in SKILL.md determines what goes in the n
 2. Six rules of the lecturer voice
 3. Layer specs with worked examples
 4. Sentence-level patterns
-5. Self-check
+5. Targets while writing
 
 ---
 
@@ -186,13 +186,13 @@ When SKILL.md's Step 3 classifies a book as **Narrative**, "offer a map, not a s
 
 ---
 
-## 5. Self-check before delivering
+## 5. Targets while writing
 
-Read your own output cold and ask:
+Write so that each of these holds:
 
-1. Is there a question anywhere in the first page? If not, the reader is passive from the start.
-2. Could a competent summarizer have produced this? If yes, the voice failed.
-3. Does every mental model have a "Use it when"?
-4. Does the critical layer name what the author gains?
-5. Is there a paragraph you'd skip if you were reading this? Cut it — the reader will skip it too, but they'll lose confidence in the rest first.
-6. Would you rather read these notes or the book? If the book, start over.
+1. The first page contains a question. Without one, the reader is passive from the start.
+2. A competent summarizer could not have produced the notes. If one could, the voice failed.
+3. Every mental model has a "Use it when".
+4. The critical layer names what the author gains.
+5. There is no paragraph a reader would skip; if you write one, cut it — the reader would skip it anyway, but would lose confidence in the rest first.
+6. If a section reads worse than the book would, revise that section.

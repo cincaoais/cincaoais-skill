@@ -1,6 +1,6 @@
 # Playbook — using this knowledge to do tasks
 
-Pick the recipe that matches the request. Each lists what to read and the procedure. Always name the book (FM/SE) behind each rule you apply, and state that the output is educational, not financial advice.
+Pick the recipe that matches the request. Each lists what to read and the procedure. Always name the book (FM/SE) behind each rule you apply. Add a one-line note that the output is educational, not financial advice. Keep disclaimers and caveats short and spend most of the response on the analysis itself.
 
 ## 1. Answer a question about the books
 1. Topic Index in SKILL.md → read the 1–3 chapter files named there.
@@ -9,6 +9,8 @@ Pick the recipe that matches the request. Each lists what to read and the proced
 
 ## 2. Analyse a chart (screenshot or OHLC data)
 Read: cheatsheet.md, fm-ch02, fm-ch05, fm-ch06, se-ch09.
+
+0. Dense or low-res screenshot (many small candles, hard-to-read wicks): ask for the OHLC data or a sharper capture around the key swings. If the image is a local file and PIL is available, crop and zoom on those candles before judging wick vs close, EQH/EQL or FVG overlap. When OHLC data is available, use it rather than the image for these candle-by-candle calls.
 1. Identify the two timeframes (ask if unknown; default H1+M5 or M15+M1).
 2. HTF: mark valid pullbacks → IDM-confirmed major highs/lows → BOS/CHoCH (body closes only) → current trend.
 3. Mark liquidity: EQH/EQL, trendlines, range edges, session highs/lows, PDH/PDL; note which are already swept.
@@ -35,6 +37,7 @@ Read: algorithmic-definitions.md first, then the chapters behind each rule you i
 Read: SKILL.md core, patterns.md, cheatsheet.md, se-ch10.
 - Plan skeleton: markets & TFs → daily bias routine (scroll back HTF, sessions, PDH/PDL, news) → allowed setups (from patterns.md) → entry checklist → risk rules → journaling fields (setup, TF, POI type, IDM swept?, CHoCH type, R result, mistake # from FM ch9).
 - Study plan: FM ch0→1→2→3→4→5→6→7→8→9 in order (the book is cumulative), with SE s1–s2 beside FM ch1–2, s3–s5 beside ch4, s6 beside ch3/ch5, s7–s9 beside ch6–8, s10 beside ch9.
+- Length: match the plan or notes to what the task needs — cover the substance, but don't pad with filler sections, redundant summaries or boilerplate.
 
 ## 6. Explain / teach a concept
 Read the concept's chapter files. Structure: definition (exact book wording) → valid vs invalid example (from the chapter's Reference Tables / Worked Example) → why it works (liquidity logic) → common mistake → which book says what.

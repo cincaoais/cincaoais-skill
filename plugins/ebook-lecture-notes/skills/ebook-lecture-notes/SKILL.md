@@ -31,7 +31,9 @@ Same content. One is furniture; the other lodges.
 
 ### Step 0 — Scope and triage
 
-If pointed at a directory, list every supported file first and confirm the batch with the user before starting — 12 books is a long run and they should know the shape of it.
+If pointed at a directory, list every supported file first and confirm the batch with the user before starting — 12 books is a long run and they should know the shape of it. In the same message, ask which books, if any, get a full sequential pass (see Step 4).
+
+Once the user confirms the batch, add one task-list item per book, keep it updated, and work through the whole list. Don't end a turn between books with a summary that announces the next book, with an offer to continue, or because one book is finished. Put each book's status line in the same message as your next tool call and start the next book. Stop only when every book is done or logged as failed and `_batch-log.md` is written, or when nothing can move without the user.
 
 Supported: `.pdf .epub .docx .txt .md .markdown .rst .html .htm .rtf .mobi .azw .azw3`
 
@@ -99,11 +101,13 @@ Read in this order, because it front-loads the highest-value text:
 
 This order is built for argumentative non-fiction. A book classified **Narrative** reads sequentially or not at all — see the narrative note in `references/PEDAGOGY.md`.
 
+When the text says "the table below shows…" and no table follows, the table is an image: render that page and read it (see `references/EXTRACTION.md`) rather than silently under-reporting the book's evidence.
+
 **Track what you read and what you didn't.** If you sampled, say so in the notes. A reader who thinks you read 100% will trust chapter ratings that are actually extrapolations. That trust is unearned and will eventually cost them.
 
 The reading-budget buckets in `references/EXTRACTION.md` license sampling; they never forbid reading more. At the low end of a bucket, sampling saves almost nothing — read the whole thing and say so.
 
-For a book that matters, offer a full sequential pass as the more expensive alternative. Let the user choose.
+For a book that matters, offer a full sequential pass as the more expensive alternative. For a single book, ask before you start reading. In batch mode, ask once while confirming the batch in Step 0 which books, if any, get a full pass, and don't stop mid-batch to offer it; list the books that would gain most from a full pass in `_batch-log.md`.
 
 ### Step 5 — Write NOTES.md
 
@@ -140,19 +144,13 @@ Read `references/CHARTS.md`, then build `charts.html` from `assets/template.html
 
 Aim for 4–8 charts in a typical argumentative book — but the bar overrides the count. A narrative book or a thin document may support one chart, or none; build fewer and say why in the notes. **Every chart gets a "catch" box** stating its weakness, limitation, or what it omits. A chart makes a claim more persuasive than the underlying evidence warrants; that's fine for the author and dangerous for the student. Charting a weak claim without its counterargument is the most harmful thing this skill can do.
 
-### Step 7 — Verify before delivering
+### Step 7 — Definition of done
 
-- Every number traced to text you actually read — never to memory or inference
-- Provenance tagged: **[Book]** / **[Added]** / **[Since]** / **[Verify]** — see `references/CHARTS.md` for the definitions
-- Dangling evidence chased down: if the text says "the table below shows…" and no table follows, the table is an image — render that page and read it (see `references/EXTRACTION.md`), don't silently under-report the book's evidence
-- Every chart has its catch box
-- The critical layer names the author's interest
-- Nothing quoted at length — see below
-- Self-test questions are all answerable from the notes
+The notes are done when every number comes from text you read (never memory or inference), every figure carries a **[Book]** / **[Added]** / **[Since]** / **[Verify]** tag (definitions in `references/CHARTS.md`), every chart has its catch box, the critical layer names the author's interest, nothing is quoted at length (see Copyright below), and every self-test question is answerable from the notes.
 
 ### Step 8 — Batch reporting
 
-Write `_batch-log.md`: per book, the type classification, compression achieved, what fraction was read, and any extraction problems. For batches over ~5 books, add a cross-book section — recurring themes, where books contradict each other. Contradictions between sources are among the most valuable things a reader gets from reading several books, and they're invisible when notes live in separate files.
+Write `_batch-log.md`: per book, the type classification, compression achieved, what fraction was read, and any extraction problems; then list the books that would gain most from a full sequential pass (Step 4). For batches over ~5 books, add a cross-book section — recurring themes, where books contradict each other. Contradictions between sources are among the most valuable things a reader gets from reading several books, and they're invisible when notes live in separate files.
 
 ## Copyright
 

@@ -211,8 +211,10 @@ not the one that reads as furniture.
 /ebook-lecture-notes C:\Users\me\Books\
 ```
 
-Point it at a folder and you get one notes set per book. Plain language works too — *"summarize
-this book, I don't have time to read it"* or *"make notes from these ebooks"* both fire it.
+Point it at a folder and you get one notes set per book. It confirms the list with you once —
+including which books, if any, get a full sequential read — then works through every book without
+stopping. Plain language works too — *"summarize this book, I don't have time to read it"* or
+*"make notes from these ebooks"* both fire it.
 
 **Supported formats**
 
@@ -247,8 +249,8 @@ Calibre installed for the conversion step.
    chart makes a claim more persuasive than the evidence underneath it actually warrants.
 
 **What you get.** Per book: a folder with `NOTES.md`, `charts.html`, and `_source/full_text.txt`.
-Point it at a folder of books and you also get `_batch-log.md` — cross-book themes and where the
-books contradict each other.
+Point it at a folder of books and you also get `_batch-log.md` — cross-book themes, where the
+books contradict each other, and which books would gain most from a full sequential read.
 
 **Requirements.** Python 3. Per-format extras are printed by `python3 scripts/extract.py --check`
 — typically `pypdf`/poppler for PDF, `ebooklib` + `beautifulsoup4` for EPUB, `python-docx` for
@@ -256,8 +258,9 @@ DOCX, `striprtf` for RTF, and Calibre for MOBI/AZW.
 
 **Worth knowing.** `charts.html` loads Chart.js and its fonts from CDNs, so it needs internet the
 first time it's opened. Scanned PDFs have no text layer — pages get rasterized and read visually
-instead of extracted. Notes on copyrighted books are personal study material, not something to
-republish.
+instead of extracted. Tables and charts that exist only as images are rendered at 300 dpi and
+cropped before their numbers go into the notes. Notes on copyrighted books are personal study
+material, not something to republish.
 
 ---
 
@@ -343,12 +346,13 @@ model.
    sequence of changes, edge cases, trade-offs. If something is genuinely ambiguous in a way only
    you can resolve, it asks now — rather than letting a subagent hit it three levels down. Then it
    splits the plan into work items and judges each one: needs ongoing architectural judgment (stays
-   here) or is well-specified execution a competent engineer could do from the spec alone
-   (delegated).
+   here), is small enough to finish in a handful of tool calls (also stays here), or is a sizeable,
+   independent, well-specified track a competent engineer could do from the spec alone (delegated).
 2. **Delegate (Sonnet).** Dispatches with `model: "sonnet"` set explicitly, batching everything
-   independent into a single message so it runs concurrently. Each subagent gets a self-contained
-   prompt — the task, the file paths and line numbers already known from the plan, and what "done"
-   looks like. Sequences only real dependencies.
+   independent into a single message so it runs concurrently — normally 3–4 agents at most, with
+   related items sharing one agent. Each subagent gets a self-contained prompt — the task, the file
+   paths and line numbers already known from the plan, and what "done" looks like. Sequences only
+   real dependencies.
 3. **Synthesize (strong model).** Reads each subagent's **actual diff**, not its summary — a
    summary describes intent, not necessarily what happened — resolves conflicts between agents, and
    runs the tests/build/lint itself rather than trusting self-reports.
@@ -382,23 +386,25 @@ unless `docs/` is missing or you ask.
 
 | Question | Options |
 |---|---|
-| **Gate mode** | **Manual** — hard stop after Phase 1 and Phase 2, you approve before continuing (3→4 then flow automatically). **Full auto** — an Approver subagent checks each phase against a checklist and sends it back for revision if it fails; you're notified at each gate but not blocked. |
+| **Gate mode** | **Manual** — hard stop after Phase 1 and Phase 2, you approve before continuing (3→4 then flow automatically). **Full auto** — an Approver subagent checks each phase against a checklist and sends it back for revision if it fails; you get a one-line status note at each gate as the next phase starts, and it keeps going until an Approver escalation, a blocker only you can resolve, or the end of Phase 4. |
 | **Phase 3 execution style** | Parallel subagents (capped at ~3 concurrent so results stay reviewable) or one-by-one sequential. |
 
 **The phases**
 
 | Phase | Output | What it does |
 |---|---|---|
-| **0 — Kickoff & Interview** | `docs/00-BRIEF.md` | Interviews you in batched, numbered rounds until it has honest **≥90% understanding**: goal, users, must-have vs nice-to-have, constraints, success criteria. Hard and uncomfortable questions are explicitly welcome. It restates its understanding and waits for "yes, that's it". The brief becomes the contract every later phase is checked against. |
+| **0 — Kickoff & Interview** | `docs/00-BRIEF.md` | Interviews you in batched, numbered rounds until it has honest **≥90% understanding**: goal, users, must-have vs nice-to-have, constraints, success criteria, and — if there's a UI — its visual direction. Hard and uncomfortable questions are explicitly welcome. It restates its understanding and waits for "yes, that's it". The brief becomes the contract every later phase is checked against. |
 | **1 — R&D** | `docs/01-RND.md` | Derives 4–8 research missions and dispatches them **all in parallel** as Sonnet subagents with character roles ("open-source scout", "community listener", "competitor analyst"). Typical missions: existing solutions, GitHub repos and libraries, Reddit/forums for real pain points, best-practice architectures, API/pricing/licensing constraints, failure stories. Findings are synthesized, conflicts resolved, and surprising claims spot-checked. |
-| **2 — Plan** | `docs/02-PLAN.md` | Architecture, tech stack justified by **specific Phase 1 findings**, then milestones broken into **vertical slices** — each cutting through data + logic + interface to produce something runnable. Every slice gets tasks sized for one subagent, acceptance criteria, and **its own test gate**. A fresh-eyes reviewer subagent then attacks the plan for gaps, wrong ordering, and hidden dependencies before you see it. |
+| **2 — Plan** | `docs/02-PLAN.md` | Architecture, tech stack justified by **specific Phase 1 findings**, then milestones broken into **vertical slices** — each cutting through data + logic + interface to produce something runnable. Every slice gets tasks sized for one subagent, acceptance criteria, and **its own test gate**. |
 | **3 — Execute** | `docs/03-EXECUTION-LOG.md` | One slice per subagent, with its acceptance criteria and test gate attached. Subagents must report **actual test output** as evidence; the commander then reads the real diff and re-runs the tests itself. Every dispatch and result is logged as it happens, which is how a fresh session resumes mid-execution. A slice that fails twice the same way stops looping — it gets taken over directly or re-scoped. |
 | **4 — Review & Demo** | `docs/04-REVIEW.md` | Fresh reviewer subagents hunt bugs, security issues, dead code, and divergence from the plan. Full test suite, plus **scenario walkthrough tests** demoing the system end to end — happy path, edge cases, failure modes. Fix and re-run until green. Phase 4 always ends with you, even in full-auto mode. |
 
 **Approver checklist (full-auto mode).** A phase document passes only if it fully serves the brief
 with no blocking unanswered question, claims are sourced / decisions justified / evidence attached,
 the logic has no contradictions or missing steps, and **a stranger could execute the next phase
-from this document alone**. Max two revision loops per gate, then it escalates to you.
+from this document alone**. The plan is also checked for gaps, wrong slice ordering, hidden
+dependencies between slices, and unstated assumptions; in manual mode, your approval is that
+review. Max two revision loops per gate, then it escalates to you.
 
 **Install `orchestrate` alongside it.** system-builder delegates its research and coding fan-out
 through orchestrate's protocol. Claude Code plugins have no dependency field, so this isn't
@@ -477,7 +483,9 @@ credential reads, elevated shells, hidden instructions…) before you see a shor
 five. Only the skills you pick are installed, then it carries on with your original request.
 
 **How to invoke.** It fires on its own for tasks like *"build an integration for Shopify"*, or
-explicitly with `/skill-scout:skill-scout <task>`. Say *"skip skill search"* to bypass it.
+explicitly with `/skill-scout:skill-scout <task>`. Say *"skip skill search"* to bypass it. It also
+stays quiet when no one can answer its questions: in subagents, scheduled or non-interactive runs,
+or when you've asked Claude to work without check-ins.
 
 **Requirements.** Node.js 18+ (no npm dependencies). Optional: a logged-in `gh` CLI for GitHub code
 search. Full details, including how to disable it: [`plugins/skill-scout/README.md`](plugins/skill-scout/README.md).
@@ -612,9 +620,10 @@ Keep `plugin.json` and `marketplace.json` descriptions in sync, and bump `versio
 `system-builder` and `ebook-lecture-notes` originated as third-party `.skill` archives; neither
 recorded an author or a license. `ebook-lecture-notes` was patched at import — see
 [ebook-lecture-notes changes from upstream](#ebook-lecture-notes-changes-from-upstream);
-`system-builder` is unmodified. `orchestrate`, `rnd`, `trading-system-review`, and
-`smart-money-concepts` are personal. `skill-scout` and `codebase-teacher` come from Snapdec Sdn Bhd;
-`codebase-teacher` was adapted on import to run standalone (bundled theme, Windows fixes).
+`system-builder` was imported unmodified and has since been edited here. `orchestrate`, `rnd`,
+`trading-system-review`, and `smart-money-concepts` are personal. `skill-scout` and
+`codebase-teacher` come from Snapdec Sdn Bhd; `codebase-teacher` was adapted on import to run
+standalone (bundled theme, Windows fixes).
 
 `smart-money-concepts` is study notes on two copyrighted ebooks.
 

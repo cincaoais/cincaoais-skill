@@ -58,6 +58,7 @@ It stays quiet for:
 - small edits, quick questions, and one-line fixes
 - follow-up steps inside a task that's already underway
 - domains it already searched in the current session
+- runs where no one can answer its question: subagents, scheduled or non-interactive runs, or when you've asked Claude to work without check-ins
 - any request where you say **"skip skill search"**
 
 ## Requirements

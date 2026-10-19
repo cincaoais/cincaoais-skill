@@ -1,6 +1,6 @@
 # Review Report Template — docs/04-REVIEW.md
 
-Use this exact structure. Every claim of "working" needs attached evidence (real command output), never assertions.
+Use this exact structure. Every claim of "working" needs attached evidence (real command output), never assertions. Match the length of each section to what the user needs to judge the result: cover the substance, but do not pad with filler sections, redundant summaries, or boilerplate. If a section doesn't apply, write "None" in one line.
 
 # Review & Test Report: [Project Name]
 

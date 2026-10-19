@@ -21,9 +21,11 @@ work in parallel.
   before dispatching anything — don't let a subagent discover the ambiguity
   three levels down.
 - Decompose the plan into discrete work items. For each, judge: does it need
-  ongoing architectural judgment (keep it here), or is it well-specified
-  execution/research a competent engineer could do from the spec alone
-  (delegate)?
+  ongoing architectural judgment (keep it here), can you finish it yourself
+  in a handful of tool calls (do it here), or is it a sizeable, independent,
+  well-specified track a competent engineer could do from the spec alone
+  (delegate)? Give related small items to one agent rather than several, and
+  keep spawn counts low.
 
 ## Phase 2 — Delegate (Sonnet)
 
@@ -31,7 +33,9 @@ work in parallel.
   explicitly set. Do not omit `model` — Agent otherwise inherits this
   session's (expensive) model.
 - Batch everything independent into a single message with multiple Agent
-  calls so they run concurrently.
+  calls so they run concurrently, normally no more than 3-4 at once unless
+  the calling skill sets its own count; if more items qualify, merge related
+  ones.
 - Give each agent a self-contained prompt: what to do, the relevant file
   paths/line numbers already known from the plan, and what "done" looks
   like. Don't make it re-derive the plan you already worked out in Phase 1.
