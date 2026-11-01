@@ -87,7 +87,7 @@ instead of silently picking a side.
 | Search engines | The landscape, comparisons, recent news | WebSearch; firecrawl search when available (its `developer` category covers repos and issues) |
 | GitHub | Reference implementations, maturity signals | `gh search repos\|code\|issues`, `gh api`, topic pages, awesome-lists |
 | Community | The reality check: production pain and gotchas | Reddit, Hacker News (Algolia API, no bot wall), Stack Overflow, X |
-| Chinese platforms | Fields active in China; local tools and technique | Douyin, Bilibili, Zhihu, Xiaohongshu, CSDN, Juejin |
+| Chinese platforms | Fields active in China; local tools and technique | Douyin, Bilibili, Zhihu, Xiaohongshu, CSDN, Juejin. Douyin: find pages with a `site:douyin.com` web search, then read them with the helper; its own search needs login |
 | Video | Demos, talks, walkthroughs | The `video-analysis` skill, if installed, for YouTube, Douyin and Bilibili |
 | Official docs and papers | Confirming capabilities, limits and pricing | Vendor docs, arXiv, SSRN |
 

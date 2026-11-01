@@ -116,3 +116,34 @@ mode this time, so no `--headed` rerun was needed.
 
 Live character counts drift a little from the W2 run (Bilibili 2711 -> 2696, HN Algolia 21942 -> 21842);
 the labels and judgments did not change.
+
+## Addendum: Douyin video and topic pages (2026-11-01)
+
+Ran one batch later the same day, signed out and headless (cloakbrowser 0.6.5), with:
+
+```sh
+~/.local/bin/uv run --quiet plugins/rnd/skills/rnd/scripts/stealth_fetch.py --url "https://www.douyin.com/video/7667836637896606629" --url "https://www.douyin.com/shipin/7638065794869544994" --format json --max-chars 4000
+```
+
+| Site | URL | status | blocked / block_reason | chars_total | title |
+|---|---|---|---|---|---|
+| Douyin video page | `https://www.douyin.com/video/7667836637896606629` | 200 | false / none | 3256 | 量化深度解析 - 抖音 |
+| Douyin topic page (`/shipin/`) | `https://www.douyin.com/shipin/7638065794869544994` | 200 | false / none | 3113 | 丁格量化是什么-抖音 |
+
+The video page text had the caption, publish time (2026-07-29 14:42), the author (AICDA, 粉丝108
+获赞464) and recommended videos with full captions; comments read "Please login before leaving
+comments". The topic page text had the main video's caption and counts, about 15 comments, then
+登录后可看更多 (log in to see more), and related videos with captions. A 查看AI文稿 (view AI
+transcript) button exists; it was not clicked or tested.
+
+Earlier probe rows still hold: Douyin *search* stays a `login_wall`. The no-login route to Douyin
+content is discovery elsewhere — a normal web search for `site:douyin.com 量化交易` returned that
+`douyin.com/shipin/` page — then reading the hit with the helper. Use `--login` only for Douyin
+search and for comments past the first batch. Watch the ids: the `/shipin/<id>` number is a topic id,
+so using it as `/video/<id>` gives 你要观看的视频不存在 (the video does not exist).
+
+- `github.com/521w/douyin-mcp` does not help: it only parses a share link you already have, turning it
+  into metadata plus a download URL.
+- Its method — read a `dytk` token from the share page, then call the `iesdouyin.com/web/api/v2/aweme/iteminfo/`
+  API — fails today: the share page had 0 `dytk` occurrences and the API returned HTTP 200 with an
+  empty body. Do not recommend it.

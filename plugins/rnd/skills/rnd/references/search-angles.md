@@ -107,7 +107,12 @@ claims. Stars date quickly; last push and whether maintainers answer issues say 
   practitioners and threads, not as the primary search engine.
 - **Bilibili** — `https://search.bilibili.com/all?keyword=<中文关键词>` returned real results in the
   probe. The most reliable Chinese-language search source without sign-in.
-- **Douyin** — `https://www.douyin.com/search/<中文关键词>` showed only a login modal in the probe.
+- **Douyin** — its own search, `https://www.douyin.com/search/<中文关键词>`, showed only a login modal
+  in the probe. Individual pages do read without login: video pages at
+  `https://www.douyin.com/video/<id>` and topic pages at `https://www.douyin.com/shipin/<id>`. Find
+  them with a normal web search for `site:douyin.com <中文关键词>` (also `site:douyin.com/video`,
+  `site:douyin.com/shipin`) and read them with `scripts/stealth_fetch.py`. The `/shipin/` number is a
+  topic id, not a video id, so do not paste it into `/video/`.
 - **Zhihu** — `https://www.zhihu.com/search?q=<中文关键词>` hit a captcha wall in the probe.
 - **Xiaohongshu, CSDN, Juejin** — try normal search first; treat them like the walled sites above when
   they refuse.

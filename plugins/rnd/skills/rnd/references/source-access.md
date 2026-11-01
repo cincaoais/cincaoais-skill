@@ -142,7 +142,9 @@ Read-only probe on Windows 11 with cloakbrowser 0.6.5 and its bundled Chromium; 
 this is a snapshot, not a permanent contract.
 
 The results below are from the re-run after the heuristic fix, so `block_reason` matches the judgment
-column for all eight walled/relevant rows. The two controls were measured in the first run.
+column for all ten rows. The two controls were measured in the first run. The two Douyin page rows
+(video and topic) were added in a later run on 2026-11-01 with `--max-chars 4000`; `chars_total` is the
+whole page, so that cap does not change it.
 
 | Site | URL tried | Headless: blocked / reason / chars | Headed | Sign-in needed | Judgment |
 | --- | --- | --- | --- | --- | --- |
@@ -153,22 +155,32 @@ column for all eight walled/relevant rows. The two controls were measured in the
 | X search | `https://x.com/search?q=cloakbrowser&f=live` | true / login_wall / 245 | same wall | yes | Needs one-time `--login` (unverified) |
 | X profile | `https://x.com/AnthropicAI` | false / none / 2354 | not needed | no | Works without login |
 | Douyin search | `https://www.douyin.com/search/%E9%87%8F%E5%8C%96%E4%BA%A4%E6%98%93` | true / login_wall / 623 | login modal (captcha label in the first run) | yes | Needs one-time `--login` (unverified; flaky) |
+| Douyin video page | `https://www.douyin.com/video/7667836637896606629` | false / none / 3256 | not needed | no (comments past the first batch: yes) | Works without login |
+| Douyin topic page (/shipin/) | `https://www.douyin.com/shipin/7638065794869544994` | false / none / 3113 | not needed | no (comments past the first batch: yes) | Works without login |
 | Bilibili search | `https://search.bilibili.com/all?keyword=%E9%87%8F%E5%8C%96%E4%BA%A4%E6%98%93` | false / none / 2696 | not needed | no | Works without login |
 | Zhihu search | `https://www.zhihu.com/search?q=%E9%87%8F%E5%8C%96%E4%BA%A4%E6%98%93` | true / captcha / 81 | same wall | no — captcha persists | Skip (captcha wall) |
 | HN Algolia API | `https://hn.algolia.com/api/v1/search?query=cloakbrowser&tags=story` | false / none / 21842 | not needed | no | Works without login |
 
 What the snapshot means in practice:
 
-- **Works without login:** Hacker News HTML, an X *profile* page, Bilibili search, and the HN Algolia
-  JSON API. Prefer Bilibili for Chinese-language searching.
+- **Works without login:** Hacker News HTML, an X *profile* page, Bilibili search, a Douyin *video*
+  page, a Douyin *topic* page (`/shipin/<id>`), and the HN Algolia JSON API. Prefer Bilibili for
+  Chinese-language searching.
 - **Needs one-time `--login`:** old Reddit, X *search*, and Douyin search. The probe was read-only and
   never signed in, so whether the sign-in actually unlocks them is unverified. Try it once, and fall
   back to the skip row if the wall persists.
+- **Finding Douyin pages without login:** Douyin search is walled, but individual pages are not. Run a
+  normal web search with `site:douyin.com <terms>` (or `site:douyin.com/video`, `site:douyin.com/shipin`)
+  and read the hits with the helper; a plain `site:douyin.com 量化交易` search returned a `/shipin/` page
+  that fetched with status 200 and `blocked: false`. A `/shipin/<id>` number is a topic id, not a video
+  id — putting it in `/video/<id>` gives "你要观看的视频不存在" (the video does not exist). Use `--login`
+  only for Douyin search and for comments past the first batch (the topic page showed about 15 comments,
+  then "登录后可看更多"). The "查看AI文稿" (view AI transcript) button exists but was not tested.
 - **Skip, or expect a challenge:** Reddit `www` search and Zhihu search are captcha walls that headed
-  mode did not fix. Douyin headless is slow and flaky; use `--headed` if it matters and expect a login
-  modal.
+  mode did not fix. Douyin *search* is slow and flaky headless; use `--headed` if it matters and expect
+  a login modal. The video and topic pages loaded fine headless.
 - The first probe run, before the heuristic fix, mislabeled Reddit search and X search as `none` and
-  Douyin's login modal as `captcha`. The current helper labels all eight rows as shown. Character counts
+  Douyin's login modal as `captcha`. The current helper labels all ten rows as shown. Character counts
   drift between runs (Bilibili 2711 -> 2696, HN Algolia 21942 -> 21842); the judgments did not change.
 
 If a walled source is skipped, say so under "Coverage gaps" in the report and name what it would have
