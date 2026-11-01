@@ -5,10 +5,12 @@ description: >
   system) rated, audited, or judged the way a senior trader or prop-desk head would: "rate my trading
   system", "is my system still working / still in line with the market", "is it outdated", "is it
   overfitted", "should I revamp or retire it", "senior trader review", "/trading-system-review <repo>".
-  Any market (gold/XAUUSD, futures, FX, crypto, stocks). Not for researching a new strategy idea
-  (rnd) or building a new system (system-builder).
+  Also use to vet someone else's GitHub trading repo or framework before learning from or building
+  on it: "vet this trading repo", "is this GitHub bot any good", "should I build on
+  <framework/repo>". Any market (gold/XAUUSD, futures, FX, crypto, stocks). Not for open-ended
+  research on a new idea or framework (use rnd).
 model: best
-argument-hint: "<path-to-trading-repo>"
+argument-hint: "<path-to-trading-repo | github-url>"
 ---
 
 # Trading System Review
@@ -21,6 +23,20 @@ Rate one existing trading system with **fresh eyes**, the way a senior trader wo
 - What is outdated?
 - What is worth adding?
 - Deploy, incubate, revamp or retire?
+
+## Modes
+
+Two modes share the same phases, evidence rules and rubric:
+
+- **own** (the default): "rate my system", "is my system still working". You judge a system the
+  user already runs or built.
+- **reference**: "is this repo, framework or strategy worth learning from or building on?", "vet
+  this GitHub trading bot". You judge someone else's code before the user adopts it.
+
+Pick reference mode when the argument is a GitHub or GitLab URL, or when the user's wording is
+about adopting or learning from someone else's code. If it is unclear, ask once. Each phase below
+marks its reference-mode differences with a **Reference mode:** paragraph; everything else still
+applies.
 
 Three things are kept apart:
 
@@ -63,6 +79,11 @@ EVIDENCE RULES (fresh-eyes review)
    `OUT = ./trading-reviews/<system>-<YYYY-MM-DD>/` and create it.
    - If OUT already exists from an interrupted run today, continue from the first missing artifact
      instead of restarting.
+   - **Reference mode:** Set `OUT = ./trading-reviews/ref-<owner>-<repo>-<YYYY-MM-DD>/` and
+     create it. Clone with `git clone --depth 1 <url> OUT/src`, or use the given local path.
+     Record the URL and commit SHA (`git -C OUT/src rev-parse HEAD`). Never run live or paper
+     trading; install only the dependencies the backtest needs, inside a venv in OUT. The
+     contamination check still applies, but it is usually clean for a third-party repo.
 2. **State your footing.** Give your model name, its knowledge cutoff, and today's date. These go
    into `scorecard.model`.
    - The `model: best` frontmatter only lasts for the current turn. Once the user replies to any
@@ -114,6 +135,14 @@ Use the **orchestrate** skill to run one Sonnet subagent with the evidence rules
 - **Tests:** the test command, plus the result if it runs in under 5 minutes.
 - **Blockers:** anything that stops a backtest from running.
 
+**Reference mode:** also record:
+
+- Framework and version.
+- Licence (SPDX) and whether it allows private use and modification.
+- Repo health from `gh api repos/<owner>/<repo>`: stars, forks, `pushed_at`, `archived`, open
+  issues, latest releases, contributor count.
+- Every performance claim in the README, listed as a CLAIM to test, not as evidence.
+
 ## Phase 2 — Senior-trader plan (you, no delegation)
 
 Read `system-map.md`, `references/rubric.md` and `references/search-playbook.md`. Then write
@@ -135,6 +164,10 @@ Read `system-map.md`, `references/rubric.md` and `references/search-playbook.md`
 - **Work items W1–W4** with the model each needs: W1 → opus (judgment-heavy code reading),
   W2–W4 → sonnet. Change one only with a written reason.
 
+**Reference mode:** the edge thesis may be "none stated". The backtest plan tries to reproduce the
+README's claims on the same period, then extends to the latest data. The search plan adds playbook
+group F.
+
 ## Phase 3 — Execute (delegate)
 
 Hand W1–W4 to the **orchestrate** skill (plan → delegate → synthesize). Use the models from
@@ -148,6 +181,8 @@ backtest plan for W2, the filled search queries for W3/W4), and its definition o
 | **W2 Backtest + stats** | `trades.csv`, `prices.csv`, `variants.csv`, `live.csv` (if raw forward logs exist), `metrics.json`, `metrics-cost2x.json`, `backtest-notes.md` | The backtests ran per plan and trades are normalised (see W2 notes below). Then `python "<skill-dir>/scripts/review.py" stats --trades trades.csv --capital C --dd-limit L --periods-per-year 252 [--prices prices.csv] [--variants variants.csv] [--live live.csv] --out metrics.json` has run (use `--periods-per-year 365` for 24/7 markets), and again on the cost-shock trades → `metrics-cost2x.json`. |
 | **W3 Market currency** | `market-research.md` | Playbook groups A, B, C and E are run. Each answer is a claim with date, source, tier, and VERIFIED/UNVERIFIED. It must state the instrument's current regime vs the backtest period, any venue/contract/prop-rule changes, and any reports of this strategy class decaying. |
 | **W4 New techniques** | `techniques-research.md` | Playbook group D is run. Per candidate: what it is, evidence level (backed / mixed / hype) with its critique source, fit to this system, and rough effort. |
+
+**Reference mode:** W2 reports claimed vs reproduced per claim. W3 also runs playbook group F.
 
 **System-map excerpts:** in each prompt, wrap them in an opening and a closing tag that carry the
 same short random id, each tag on its own line (`<pasted_content id="k3f9">` …
@@ -215,6 +250,24 @@ Read the actual output files, not the subagents' summaries. Then:
 
 `dimensions` must list all ten rubric dimensions with the rubric's exact names and weights.
 
+**Reference mode:** score the same ten dimensions; `verdict` uses the existing enum and judges the
+strategy as-is. Add an `adoption` block to `scorecard.json`:
+
+```json
+"adoption": {
+  "verdict": "ADOPT-AS-BASE | LEARN-FROM | AVOID",
+  "why": "2-3 sentences",
+  "license": "SPDX id", "license_ok_for_private_use": true,
+  "maintenance": "active | slowing | abandoned, with pushed_at date",
+  "claims": [{"claim": "...", "reproduced": "yes | no | partly | not testable", "evidence": "metric path or file"}],
+  "what_to_take": ["ideas, modules, patterns worth reusing"],
+  "what_to_avoid": ["bugs, biases, bad patterns found"]
+}
+```
+
+Start `summary` with `Adoption: <VERDICT>, <one-line why>.` `review.py` renders `summary` but not
+`adoption`, so this is how the adoption verdict reaches `report.html`.
+
 ## Phase 5 — Report
 
 ```
@@ -233,6 +286,9 @@ Then post a chat summary:
 - independence status
 - what was not tested
 - the path to `report.html`
+
+**Reference mode:** the chat summary leads with the adoption verdict, then the claims reproduced vs
+not, then what to take and what to avoid.
 
 ## Boundaries
 

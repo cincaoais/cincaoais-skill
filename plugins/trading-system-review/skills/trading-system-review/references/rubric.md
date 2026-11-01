@@ -281,3 +281,23 @@ that can drift apart?
 - aligrithm, *Backtest Integrity Checklist* — https://aligrithm.com/the-backtest-integrity-checklist/
 - Pardo, *The Evaluation and Optimization of Trading Strategies* (2008): walk-forward efficiency ≥ 50–60% [B]
 - Davey, incubation and Monte Carlo practice — https://www.financialwisdomtv.com/post/building-winning-algorithmic-trading-systems-kevin-davey-s-complete-framework-for-trading-success
+
+## Reference adoption
+
+Reference mode answers a different question from own mode: is this repo, framework or strategy
+worth learning from or building on? Score the same ten dimensions, then set `adoption.verdict` by
+these rules.
+
+- **AVOID:**
+  - the `data_code_integrity` gate fails with look-ahead or survivorship that isn't a small fix;
+  - or the licence forbids the intended use;
+  - or the repo is archived or abandoned and its backtest doesn't run.
+- **LEARN-FROM:**
+  - the code or ideas are useful, but the edge is unproven or overfit (`overfitting_control` ≤ 2),
+    or claims don't reproduce;
+  - or maintenance is weak.
+- **ADOPT-AS-BASE** needs all four:
+  - the integrity gate passes;
+  - the licence allows the use;
+  - there was a push within ~12 months, or it's a stable, widely used framework;
+  - the core claims reproduce within tolerance (state the tolerance used).

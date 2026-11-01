@@ -4,6 +4,9 @@ Your training data stops at your knowledge cutoff, so everything about *today's*
 here. Fill each template's `{placeholders}` from `system-map.md`, and put `{year}`/`{month}` from
 today's date into every query.
 
+The templates use gold, prop-firm and MT5 as worked examples. They are examples for those markets,
+not defaults: fill the placeholders for whatever the target system actually trades.
+
 ## Tools
 
 - **Search:** use the session's web-search tool (WebSearch, or firecrawl search if that's what is
@@ -13,12 +16,15 @@ today's date into every query.
     sites;
   - a normal fetch returns 403, a captcha, a bot check, or an empty page.
 
-  Run it from Bash:
+  Run the bundled helper from Bash:
   ```bash
-  python -c "from cloakbrowser import launch; b=launch(headless=True); p=b.new_page(); p.goto('URL', timeout=60000); print(p.inner_text('body')[:20000]); b.close()"
+  python "<skill-dir>/scripts/stealth_fetch.py" --url URL --format md
   ```
-  If the import fails, tell the user to `pip install cloakbrowser`; it downloads its own binary.
-  Don't install packages yourself.
+  Flags: `--check` (exit 3 if CloakBrowser is not installed), `--url` (repeatable), `--headed`,
+  `--profile`, `--login URL`, `--max-chars`, `--format json|md`. JSON output includes `blocked` and
+  `block_reason` per URL.
+  If `--check` says it is not ready, ask the user once whether to install CloakBrowser now or skip
+  the bot-walled sites. Record every skipped source under `limitations`.
 - **Never** use the Claude-in-Chrome extension for this research.
 
 ## Recency rules
@@ -59,8 +65,8 @@ Two more rules:
 - `{instrument} volatility regime {month} {year}`
 - `{instrument} realized volatility ATR {year} record`
 - `{instrument} all-time high drawdown correction {month} {year}`
-- `{instrument} drivers {month} {year}`. For gold: real yields, DXY, central-bank buying
-  (World Gold Council). For crypto: spot ETF flows, funding, open interest.
+- `{instrument} drivers {month} {year}`. Examples: gold — real yields, DXY, central-bank buying
+  (World Gold Council); crypto — spot ETF flows, funding, open interest.
 - `{instrument} session liquidity spreads {year}`
 
 Answer this: is the current regime (volatility level, trend vs range, drivers) the same as the
@@ -100,3 +106,17 @@ Always pair a technique query with a critique query.
 - `{platform} outage OR bug {month} {year}` (MT5, Tradovate, Rithmic, the broker's API)
 - `{prop_firm} payout denied OR account breach complaints {month} {year}`
 - `{instrument} flash crash OR gap {month} {year}`. This checks the stop and slippage assumptions.
+
+## F — Reference repo reputation (W3, reference mode only)
+
+Run this only when reviewing someone else's repo, framework or strategy. It tests whether the
+project's reputation and the bugs others found match what the code and README claim.
+
+- `"{owner}/{repo}" reddit`
+- `{repo} backtest results real OR live`
+- `{repo} look-ahead OR repainting OR "doesn't work"`
+- `site:github.com {repo} issues lookahead`
+- Forks that fixed bugs: `gh api repos/{owner}/{repo}/forks?sort=stargazers`
+
+Record the fork names, what they changed, and the issues they point at. A fork that fixes a
+look-ahead bug is evidence the original still has it.

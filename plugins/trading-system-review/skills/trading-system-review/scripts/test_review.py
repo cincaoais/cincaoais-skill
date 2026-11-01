@@ -182,8 +182,9 @@ def test_open_trades_rejected_and_epoch_seconds_parsed(tmp_path):
     with pytest.raises(SystemExit, match="open trades"):
         rv.normalize(df)
     df = make_trades(5)
-    df["entry_time"] = df["entry_time"].astype("int64") // 10**9  # MT5-style epoch seconds
-    df["exit_time"] = df["exit_time"].astype("int64") // 10**9
+    epoch = pd.Timestamp("1970-01-01", tz="UTC")
+    df["entry_time"] = (df["entry_time"] - epoch) // pd.Timedelta("1s")  # MT5-style epoch seconds
+    df["exit_time"] = (df["exit_time"] - epoch) // pd.Timedelta("1s")
     t = rv.normalize(df)
     assert t["entry_time"].iloc[0] == pd.Timestamp("2023-01-02", tz="UTC")
 
