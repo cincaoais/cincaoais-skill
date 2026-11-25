@@ -12,11 +12,12 @@ of truth.
 ## Contents
 
 - [Install](#install)
-- [The four plugins at a glance](#the-four-plugins-at-a-glance)
+- [The five plugins at a glance](#the-five-plugins-at-a-glance)
 - [Which one do I use?](#which-one-do-i-use)
 - [User guide](#user-guide)
   - [`/rnd`](#rnd--research-anything-before-building-it)
   - [`/orchestrate`](#orchestrate--plan-expensive-execute-cheap)
+  - [`/orca-coordinator`](#orca-coordinator--claude-plans-orca-workers-do-the-work)
   - [`/trading-system-review`](#trading-system-review--a-senior-traders-verdict-on-an-existing-system)
   - [`/skill-scout`](#skill-scout--check-for-an-existing-skill-before-a-big-task)
 - [Repo layout](#repo-layout)
@@ -42,6 +43,7 @@ This registers the marketplace under the name **`claude-skills`** (taken from
 ```
 /plugin install rnd@claude-skills
 /plugin install orchestrate@claude-skills
+/plugin install orca-coordinator@claude-skills
 /plugin install trading-system-review@claude-skills
 /plugin install skill-scout@claude-skills
 ```
@@ -86,16 +88,17 @@ marketplace, delete the loose directories and let the marketplace be the single 
 
 ---
 
-## The four plugins at a glance
+## The five plugins at a glance
 
 | Plugin | Command | Version | What it does |
 |---|---|---|---|
 | `rnd` | `/rnd` | 2.0.0 | Reuse-first research across web, GitHub, Reddit / X and Chinese platforms → decision-ready report + Claude Code handoff prompt |
 | `orchestrate` | `/orchestrate` | 1.0.1 | Plans with the expensive model, fans execution out to parallel Sonnet subagents |
+| `orca-coordinator` | `/orca-coordinator` | 1.0.0 | Claude Code coordinates; Orca dispatched workers (Antigravity first, pi fallback) do the work, sized as micro-tasks |
 | `trading-system-review` | `/trading-system-review` | 1.1.0 | Fresh-eyes senior-trader review of an existing trading system, or vetting of someone else's repo: fresh backtest, deflated Sharpe / PBO / Monte Carlo stats, today's-market research, gated rubric → offline HTML report with a deploy / incubate / revamp / retire verdict |
 | `skill-scout` | `/skill-scout:skill-scout` | 0.1.1 | Before a substantial task, finds existing agent skills that fit it, security-reviews them, and installs only the ones you approve |
 
-All four are **skills**, so you don't strictly need the slash command. Describing the task in
+All five are **skills**, so you don't strictly need the slash command. Describing the task in
 plain language triggers them too. The slash command is just the explicit way to ask.
 
 ---
@@ -107,6 +110,7 @@ plain language triggers them too. The slash command is just the explicit way to 
 | Learn a new area / compare options / find repos and frameworks to reuse (trading topics included) | `/rnd` |
 | Improve something that already exists (a service, a pipeline, a strategy) | `/rnd` — it has an "improve" mode |
 | Do one big multi-part task faster and cheaper | `/orchestrate` |
+| Keep Claude's quota for thinking and hand the work to Orca workers (Antigravity, pi) | `/orca-coordinator` |
 | Find out if an existing trading system still works, is overfitted, or is outdated | `/trading-system-review` |
 | Vet someone else's GitHub trading repo or framework before learning from or building on it | `/trading-system-review` — reference mode |
 | Check for an installable skill before building a capability by hand | `/skill-scout:skill-scout` |
@@ -236,6 +240,47 @@ work directly rather than force a fake parallel split.
 
 ---
 
+### `/orca-coordinator` — Claude plans, Orca workers do the work
+
+**What it does.** Turns Claude Code into the coordinator of an Orca
+orchestration run and applies standing rules you would otherwise repeat in every prompt. Claude
+spends its tokens on ideas, R&D directions, specs and review; Orca dispatched workers do the
+reading, coding, testing, cloning and web research. Built for a quota-limited Claude plan.
+
+**How to invoke**
+
+```
+/orca-coordinator R&D order-flow strategies for gold; my notes are in ./orderflow
+/orca-coordinator fix the findings in report.md by priority
+```
+
+**What it applies**
+
+- **Roles.** Claude makes small targeted reads only; bigger reading goes to a scout worker
+  whose report Claude reads. Your own research is treated as input to check, not as truth.
+- **Worker choice.** Antigravity first, then another Antigravity model on a quota error, then pi.
+  Your latest word on quota in the conversation wins.
+- **Micro-tasks for pi.** About 100 KB of reading per pi worker, one output file written one
+  section per tool call, map-reduce for big syntheses, many small workers in waves.
+- **Spec recipe.** Target, change, constraints, ownership (disjoint files), acceptance, and a
+  fixed worker-rules line.
+- **Plan gate.** A short task table, then dispatch, unless you ask to review first or the work
+  touches risk/execution code, live accounts, secrets or anything outward-facing.
+- **Verification.** Runs each acceptance check itself, re-dispatches anything suspicious, uses
+  an independent second worker for critical numbers, tests both options when torn.
+- **Timed starts.** "Start at midnight" becomes a one-time scheduled job, in Malaysia time
+  (UTC+8) unless you say otherwise.
+- **Close-out.** Releases workers, closes leftover tabs and worktrees, and reports outcome,
+  evidence, open items and anything done that you did not ask for.
+
+`references/pi-recovery.md` holds fixes for known pi failures: an unsent prompt, stalls by context
+%, provider 400 errors, `consumer_fenced` after a new session, and jobs killed on release.
+
+**Needs:** Orca with its `orchestration` skill (this skill loads Orca's version-matched guide for
+the actual commands), plus the worker CLIs you use (Antigravity `agy`, pi).
+
+---
+
 ### `/trading-system-review` — a senior trader's verdict on an existing system
 
 **What it does.** Rates a trading repo with fresh eyes, the way a prop-desk head would — either
@@ -338,6 +383,11 @@ plugins/
   orchestrate/
     .claude-plugin/plugin.json      # name, description, version, author
     skills/orchestrate/SKILL.md     # the skill itself (frontmatter: name + description)
+  orca-coordinator/
+    .claude-plugin/plugin.json
+    skills/orca-coordinator/
+      SKILL.md
+      references/                   # pi-recovery
   rnd/
     .claude-plugin/plugin.json
     skills/rnd/
@@ -376,7 +426,7 @@ Keep `plugin.json` and `marketplace.json` descriptions in sync, and bump `versio
 
 ## Attribution
 
-`orchestrate`, `rnd`, and `trading-system-review` are personal. `skill-scout` comes from
+`orchestrate`, `orca-coordinator`, `rnd`, and `trading-system-review` are personal. `skill-scout` comes from
 Snapdec Sdn Bhd.
 
 `skill-scout` is MIT, as declared in its `plugin.json`. The personal skills have no separate

@@ -1,0 +1,8 @@
+{
+  "name": "orca-coordinator",
+  "description": "Claude Code as the coordinator, Orca dispatched workers (Antigravity first, pi fallback) as the workforce. Applies the owner's standing rules for Orca orchestration on a quota-limited plan: roles, worker choice, micro-task sizing for lightweight pi workers, spec recipe, verification, timed starts and cleanup.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Tang Cong Han"
+  }
+}

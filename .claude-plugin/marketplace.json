@@ -16,6 +16,15 @@
       "category": "development"
     },
     {
+      "name": "orca-coordinator",
+      "description": "Claude Code as the coordinator, Orca dispatched workers (Antigravity first, pi fallback) as the workforce. Applies the owner's standing rules for Orca orchestration on a quota-limited plan: roles, worker choice, micro-task sizing for lightweight pi workers, spec recipe, verification, timed starts and cleanup.",
+      "author": {
+        "name": "Tang Cong Han"
+      },
+      "source": "./plugins/orca-coordinator",
+      "category": "development"
+    },
+    {
       "name": "rnd",
       "description": "General-purpose R&D research for any domain — software systems, tools, frameworks, techniques, infrastructure, workflows or trading. Finds existing frameworks, reference repos and practitioner evidence, then produces a decision-ready report with a Claude Code handoff prompt.",
       "author": {
